@@ -83,7 +83,7 @@ jobs:
           grep -q TTS_SERVICE "$MANIFEST" || sed -i 's#<application#<queries>\n        <intent>\n            <action android:name="android.intent.action.TTS_SERVICE" />\n        </intent>\n    </queries>\n\n    <application#' "$MANIFEST"
           unzip -o -q android-res.zip -d android/app/src/main/res/
           sed -i "s/versionCode 1$/versionCode ${{ github.run_number }}/" android/app/build.gradle
-          sed -i "s/versionName \"1.0\"/versionName \"2.1.${{ github.run_number }}\"/" android/app/build.gradle
+          sed -i "s/versionName \"1.0\"/versionName \"2.2.${{ github.run_number }}\"/" android/app/build.gradle
           cat >> android/app/build.gradle <<'EOF'
 
           // חתימה קבועה — כדי שכל גרסה חדשה תותקן מעל הקודמת בלי למחוק נתונים
@@ -122,8 +122,8 @@ jobs:
       - name: Publish to Releases (easy download from the phone)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.1.${{ github.run_number }}
-          name: לוח משחקים 2.1.${{ github.run_number }}
+          tag_name: v2.2.${{ github.run_number }}
+          name: לוח משחקים 2.2.${{ github.run_number }}
           body: הורד את הקובץ luach-mischakim.apk מהטלפון והתקן אותו (מעל הגרסה הקודמת — הנתונים נשמרים).
           files: luach-mischakim.apk
           make_latest: true
