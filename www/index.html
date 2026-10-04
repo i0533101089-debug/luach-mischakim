@@ -742,7 +742,7 @@ const BUILTIN_NAMES = [
   // ספרד
   "רֵיאָל מַדְרִיד", "בַּרְצֶלוֹנָה", "אַתְלֶטִיקוֹ מַדְרִיד", "אַתְלֶטִיק בִּילְבָּאוֹ", "רֵיאָל סוֹסְיֶאדָד", "רֵיאָל בֶּטִיס", "סֶבִיָּה", "סֶבִילְיָה", "וָלֶנְסְיָה",
   "וִיָּאַרֵיאָל", "סֶלְטָה וִיגוֹ", "חִירוֹנָה", "אוֹסָסוּנָה", "חֵטָאפֶה", "מָיוֹרְקָה", "רָאיוֹ וַיֶּיקָאנוֹ", "אָלָאבֶס", "אֶסְפַּנְיוֹל", "לֶבָאנְטֶה", "אֶלְצֶ'ה",
-  "רֵיאָל אוֹבְיֶידוֹ", "לָאס פָּאלְמָס", "לֶגָאנֶס", "וָיָאדוֹלִיד",
+  "רֵיאָל אוֹבְיֶידוֹ", "לָאס פָּאלְמָס", "לֶגָאנֶס", "וָיָאדוֹלִיד", "מָלָאגָה", "רָאיוֹ וָאיֶקָנוֹ",
   // איטליה
   "יוּבֶנְטוּס", "אִינְטֶר", "אִינְטֶר מִילָאן", "מִילָאן", "נָאפּוֹלִי", "רוֹמָא", "לָאצְיוֹ", "אָטָאלַנְטָה", "פִיוֹרֶנְטִינָה", "בּוֹלוֹנְיָה", "טוֹרִינוֹ",
   "גֶ'נוֹאָה", "אוּדִינֶזֶה", "קָאלְיָארִי", "לֶצֶ'ה", "וֶרוֹנָה", "פַּארְמָה", "קוֹמוֹ", "סָסוּאוֹלוֹ", "פִּיזָה", "קְרֶמוֹנֶזֶה", "אֶמְפּוֹלִי", "מוֹנְצָה", "וֶנֶצְיָה",
@@ -765,9 +765,106 @@ const BUILTIN_ALIASES = [
   ["בני ריינה", "מַכַּבִּי בְּנֵי רֵיינֶה"], ["ריאל סוסידד", "רֵיאָל סוֹסְיֶאדָד"], ["אסטון וילא", "אַסְטוֹן וִילָא"],
   ["טוטנהאם הוטספר", "טוֹטֶנְהֶאם הוֹטְסְפֶּר"], ["וולבס", "ווּלְבְס"], ["אינטר מילאנו", "אִינְטֶר מִילָאנוֹ"],
   ["אולימפיק ליון", "אוֹלִימְפִּיק לְיוֹן"], ["אולימפיק מרסיי", "אוֹלִימְפִּיק מַרְסֵיי"], ["ר.ב. לייפציג", "ר.ב. לַייפְּצִיג"],
-  ["אינטרכט פרנקפורט", "אַיְינְטְרַכְט פְרַנְקְפוּרְט"], ["בורוסיה מנשנגלאדבאך", "בּוֹרוּסְיָה מֶנְשֶׁנְגְלַדְבַּאךְ"]
+  ["אינטרכט פרנקפורט", "אַיְינְטְרַכְט פְרַנְקְפוּרְט"], ["בורוסיה מנשנגלאדבאך", "בּוֹרוּסְיָה מֶנְשֶׁנְגְלַדְבַּאךְ"],
+  // שמות כפי שהם כתובים ב-365Scores (נבדק מול הנתונים האמיתיים)
+  ["מ.ס כפר קאסם סוהיב", "מ.ס. כְּפַר קַאסִם סוּהֵיבּ"],
+  ["בני יהודה ת\"א", "בְּנֵי יְהוּדָה תֵּל אָבִיב"],
+  ["מכבי קרית גת", "מַכַּבִּי קִרְיַת גַּת"],
+  ["מ.ס קרית ים", "מ.ס. קִרְיַת יָם"],
+  ["מכבי אחי נצרת", "מַכַּבִּי אַחִי נָצְרַת"],
+  ["מכבי קביליו יפו", "מַכַּבִּי קַבִּילְיוֹ יָפוֹ"],
+  ["הפועל כפר-שלם", "הַפּוֹעֵל כְּפַר שָׁלֵם"],
+  ["מלאגה", "מָלָאגָה"],
+  ["ראיו ואיקנו", "רָאיוֹ וָאיֶקָנוֹ"],
+  ["דפורטיבו אה קורוניה", "דֶּפּוֹרְטִיבוֹ אָה קוֹרוּנְיָה"],
+  ["בטיס", "בֶּטִיס"],
+  ["אוסאסונה", "אוֹסָאסוּנָה"],
+  ["ראסינג סנטאנדר", "רָאסִינְג סַנְטַנְדֶּר"],
+  ["האל סיטי", "הַאל סִיטִי"],
+  ["קובנטרי", "קוֹבֶנְטְרִי"],
+  ["גנואה", "גֶ'נוֹאָה"],
+  ["פרוסינונה", "פְרוֹזִינוֹנֶה"],
+  ["מונזה", "מוֹנְצָה"],
+  ["קליארי", "קָאלְיָארִי"],
+  ["פאדרבורן", "פָּאדֶרְבּוֹרְן"],
+  ["אלבסברג", "אֶלְבֶרְסְבֶּרְג"],
+  ["אוגסבורג", "אָאוּגְסְבּוּרְג"],
+  ["פ.צ. קלן", "אֶף.צֶה. קֶלְן"],
+  ["שאלקה 04", "שַׁאלְקֶה"],
+  ["פסז'", "פָּרִיס סֶן זֶ'רְמֶן"],
+  ["לה מאן", "לֶה מַאן"],
+  ["מונאקו", "מוֹנָאקוֹ"],
+  ["לוריין", "לוֹרְיָאן"],
+  ["פריס", "פָּרִיס"],
+  ["אנז'ה", "אַנְזֶ'ה"],
+  ["שטרסבורג", "שְׁטְרַסְבּוּרְג"],
+  ["ראן", "רֶן"],
+  ["אוקזר", "אוֹקְסֶר"],
+  ["טרואה", "טְרוּאָה"],
+  ["מארסיי", "מַרְסֵיי"],
+  ["סבאח", "סַבָּאח"],
+  ["וייקינג", "וִויקִינְג"],
+  ["קלאב ברוז'", "קְלַאבּ בְּרוּז'"],
+  ["פ.ס.ו איינדהובן", "פֵּה.אֶס.וֶה. אַיינְדְהוֹבֶן"],
+  ["גלאטסראיי", "גָלָאטָסָרַאי"],
+  ["לאסק לינץ", "לַאסְק לִינְץ"],
+  ["סלובן ברטיסלבה", "סְלוֹבָן בְּרָטִיסְלָבָה"],
+  ["בודו גלימט", "בּוֹדֶה גְלִימְט"],
+  ["שחטאר דונייצק", "שַׁחְטָאר דוֹנְיֶיצְק"],
+  ["א.א.ק. אתונה", "אָאֶק אַתּוּנָה"],
+  ["אלקמאר", "אַלְקְמָאר"],
+  ["רויאל אוניון סן-ז'ילואז", "רוֹיָאל יוּנְיוֹן סֶן זִ'ילוֹאָז"],
+  ["לך פוזנן", "לֶךְ פּוֹזְנָן"],
+  ["טורנסה", "טוֹרֶנְסֶה"],
+  ["לילסטרום", "לִילֶסְטְרֶם"],
+  ["צ'לייה", "צֶ'לְיֶה"],
+  ["אומוניה ניקוסיה", "אוֹמוֹנְיָה נִיקוֹסְיָה"],
+  ["יוניברסיטטה קריובה", "יוּנִיבֶרְסִיטָטֶה קְרָיוֹבָה"],
+  ["ריגה", "רִיגָה"],
+  ["קיירט אלמטי", "קַיְירָט אַלְמָטִי"],
+  ["צסק\"א סופיה", "צֶסְקָ\"א סוֹפְיָה"],
+  ["פנאתינייקוס", "פָּנָאתִינַייקוֹס"],
+  ["בוראץ", "בּוֹרָאץ"],
+  ["מיאלבי", "מְיֶלְבִּי"],
+  ["אינטר אסלקדס", "אִינְטֶר אֶסְלַקְדֶס"],
+  ["קופס", "קוּפְּס"],
+  ["טרבזונספור", "טְרַבְּזוֹנְסְפּוֹר"],
+  ["גנט", "גֶנְט"],
+  ["ארהוס", "אוֹרְהוּס"],
+  ["אגנאטיה", "אֶגְנָאטְיָה"],
+  ["מידטיילנד", "מִידְטִיילַנְד"],
+  ["היידוק ספליט", "הַיידוּק סְפְּלִיט"],
+  ["אייאקס", "אַיָּאקְס"],
+  ["לוגאנו", "לוּגָאנוֹ"],
+  ["הכוכב האדום בלגרד", "הַכּוֹכָב הָאָדוֹם בֶּלְגְרָד"],
+  ["דינמו זאגרב", "דִּינָמוֹ זָאגְרֶבּ"],
+  ["שטורם גראץ", "שְׁטוּרְם גְרָאץ"],
+  ["ביאליסטוק", "בְּיָאלִיסְטוֹק"],
+  ["אראראט-ארמניה", "אָרָרָט אַרְמֶנְיָה"],
+  ["אופי כרתים", "אוֹפִי כְּרֵתִים"],
+  ["בנפיקה ליסבון", "בֶּנְפִיקָה לִיסַבּוֹן"],
+  ["פרנצווארוש", "פֶרֶנְצְוָרוֹשׁ"],
+  ["ויקטוריה פלזן", "וִיקְטוֹרְיָה פְּלְזֶן"],
+  ["ניימיכן", "נַיימֶכֶן"],
+  ["לבסקי סופיה", "לֶבְסְקִי סוֹפְיָה"],
+  ["בראן", "בְּרָאן"],
+  ["לינקולן רד אימפס", "לִינְקוֹלְן רֶד אִימְפְּס"],
+  ["יאבלונץ", "יַאבְּלוֹנֶץ"],
+  ["סט. טרוידן", "סִינְט טְרוּידֶן"],
+  ["איבריה 1999", "אִיבֶּרְיָה"],
+  ["הארטס", "הַארְטְס"],
+  ["נורדסלנד", "נוֹרְדְשֶׁלַנְד"],
+  ["טוונטה", "טְוֶנְטֶה"],
+  ["ת'ון", "טוּן"],
+  ["פ.צ. קופנהגן", "קוֹפֶּנְהָגֶן"],
+  ["קאונו ז'אלגיריס", "קָאוּנוֹ זַ'לְגִירִיס"],
+  ["פאפוס", "פָּאפוֹס"],
+  ["ליגה לאומית", "לִיגָה לְאוּמִּית"],
+  ["סרייה א'", "סֶרְיֶה אָה"],
+  ["ליגה צרפתית", "לִיגָה צָרְפָתִית"],
+  ["קונפרנס ליג", "קוֹנְפֶרֶנְס לִיג"]
 ];
-const NIKUD_SEED_VERSION = 1;
+const NIKUD_SEED_VERSION = 2;
 function seedDictionary() {
   // 1) שמות מנוקדים שכבר יש לך במאגר ובליגות — הם קודמים לכל
   const own = new Set(globalTeamsPool);
@@ -1145,9 +1242,9 @@ async function fetchWithTimeout(url, options, ms) {
   finally { clearTimeout(timer); }
 }
 // מושך JSON. באפליקציה — ישירות (בלי חסימות דפדפן). בדפדפן — ישירות, ואם נחסם: דרך שרת מתווך.
-async function fetchJSON(url, options, timeoutMs) {
+async function fetchJSON(url, options, timeoutMs, directOnly) {
   const routes = [];
-  if (isNative() || !settings.useProxy) {
+  if (isNative() || !settings.useProxy || directOnly) {
     routes.push(null);
   } else {
     if (workingProxy !== undefined) routes.push(workingProxy);
@@ -1180,12 +1277,12 @@ function build365Url(dateObj, compIds) {
   if (compIds && compIds.length) p.set("competitions", compIds.join(","));
   return "https://webws.365scores.com/web/games/allscores/?" + p.toString();
 }
-// משיכת יום אחד (כולל עמודים נוספים אם יש)
+// משיכת יום אחד של כל המשחקים בעולם (לסריקת ליגות; כולל עמודים נוספים אם יש)
 async function fetch365Day(dateObj, compIds) {
   let url = build365Url(dateObj, compIds);
   const out = { games: [], competitions: [], countries: [] };
   for (let page = 0; page < 8 && url; page++) {
-    const json = await fetchJSON(url);
+    const json = await fetchJSON(url, undefined, 45000);
     if (!json || typeof json !== 'object') break;
     (json.games || []).forEach(g => out.games.push(g));
     (json.competitions || []).forEach(c => out.competitions.push(c));
@@ -1211,18 +1308,70 @@ function daysBetween(from, to) {
 }
 async function fetch365Range(days, compIds, onProgress) {
   const games = new Map(), comps = new Map(), countries = new Map();
-  let done = 0, failed = 0, lastErr = null;
+  let done = 0, lastErr = null;
+  const failedDays = [];
+  const collect = (r) => {
+    r.games.forEach(g => { if (g && g.id != null) games.set(g.id, g); });
+    r.competitions.forEach(c => { if (c && c.id != null) comps.set(c.id, c); });
+    r.countries.forEach(c => { if (c && c.id != null) countries.set(c.id, c); });
+  };
   await runPool(days, 3, async (day) => {
-    try {
-      const r = await fetch365Day(day, compIds);
-      r.games.forEach(g => { if (g && g.id != null) games.set(g.id, g); });
-      r.competitions.forEach(c => { if (c && c.id != null) comps.set(c.id, c); });
-      r.countries.forEach(c => { if (c && c.id != null) countries.set(c.id, c); });
-    } catch (e) { failed++; lastErr = e; }
+    try { collect(await fetch365Day(day, compIds)); }
+    catch (e) { failedDays.push(day); lastErr = e; }
     done++;
     if (onProgress) onProgress(done, days.length);
   });
+  // ניסיון חוזר אחד לימים שנכשלו
+  let failed = 0;
+  for (const day of failedDays) {
+    try { collect(await fetch365Day(day, compIds)); } catch (e) { failed++; lastErr = e; }
+  }
   if (failed === days.length) throw lastErr || new Error("network");
+  return { games: [...games.values()], comps, countries, failed };
+}
+// משיכה מהירה של הליגות שלך בלבד — בקשה אחת לכל עד 7 ימים (ואם נכשל: יום-יום)
+function build365GamesUrl(from, to, compIds) {
+  const p = new URLSearchParams({
+    appTypeId: "5", langId: String(settings.langId || 2), timezoneName: "Asia/Jerusalem",
+    userCountryId: String(settings.userCountryId || 6), competitions: compIds.join(","),
+    startDate: ddmmyyyy(from), endDate: ddmmyyyy(to)
+  });
+  return "https://webws.365scores.com/web/games/?" + p.toString();
+}
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+// השרת של 365 לפעמים מחזיר 503 או נתקע — לכן: זמן קצוב, 3 ניסיונות, ורק בסוף גיבוי יום-יום
+async function fetchGamesChunk(chunk, compIds) {
+  const url = build365GamesUrl(chunk[0], chunk[chunk.length - 1], compIds);
+  let lastErr = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const json = await fetchJSON(url, undefined, 20000, attempt < 2);
+      if (!json || !Array.isArray(json.games)) throw new Error("bad response");
+      return json;
+    } catch (e) { lastErr = e; await sleep(1000 * (attempt + 1)); }
+  }
+  throw lastErr || new Error("network");
+}
+async function fetchFavoritesRange(days, compIds, onProgress) {
+  const games = new Map(), comps = new Map(), countries = new Map();
+  let done = 0, failed = 0;
+  for (let i = 0; i < days.length; i += 7) {
+    const chunk = days.slice(i, i + 7);
+    let json = null;
+    try { json = await fetchGamesChunk(chunk, compIds); }
+    catch (e) {
+      try { const r = await fetch365Range(chunk, compIds); json = { games: r.games, competitions: [...r.comps.values()], countries: [...r.countries.values()] }; failed += r.failed; }
+      catch (e2) { failed += chunk.length; }
+    }
+    if (json) {
+      json.games.forEach(g => { if (g && g.id != null) games.set(g.id, g); });
+      (json.competitions || []).forEach(c => { if (c && c.id != null) comps.set(c.id, c); });
+      (json.countries || []).forEach(c => { if (c && c.id != null) countries.set(c.id, c); });
+    }
+    done += chunk.length;
+    if (onProgress) onProgress(done, days.length);
+  }
+  if (failed === days.length) throw new Error("network");
   return { games: [...games.values()], comps, countries, failed };
 }
 
@@ -1508,7 +1657,7 @@ async function runImportFetch() {
   setImpStatus(`מושך משחקים ל-${days.length} ימים...`);
   const ids = settings.favorites.map(f => Number(f.id));
   try {
-    const r = await fetch365Range(days, ids, (d, n) => setImpStatus(`מושך... ${d}/${n} ימים`));
+    const r = await fetchFavoritesRange(days, ids, (d, n) => setImpStatus(`מושך... ${d}/${n} ימים`));
     // עדכון שם ומדינה של הליגות המועדפות
     settings.favorites.forEach(f => {
       const c = r.comps.get(Number(f.id));
