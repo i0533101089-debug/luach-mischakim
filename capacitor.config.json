@@ -1,0 +1,19 @@
+{
+  "appId": "com.luach.mischakim",
+  "appName": "לוח משחקים",
+  "webDir": "www",
+  "backgroundColor": "#0d1117",
+  "android": {
+    "backgroundColor": "#0d1117"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
+    "SystemBars": {
+      "insetsHandling": "css",
+      "initialViewportFitValueHint": "cover",
+      "style": "DARK"
+    }
+  }
+}
