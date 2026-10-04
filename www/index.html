@@ -2334,17 +2334,21 @@ window.DEFAULTS.nameMap = {"מכבי תל אביב": "מַכַּבִּי תֵּ�
     const chunk = (arr, n) => { const out = []; for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n)); return out; };
     const compSet = new Set(competitionIds.map(Number)), teamSet = new Set(teamIds.map(Number));
     const jobs = [];
-    chunk(competitionIds, 12).forEach(ids => jobs.push({ param: 'competitions=' + ids.join(','), keep: g => compSet.has(Number(g.competitionId)) }));
-    chunk(teamIds, 12).forEach(ids => jobs.push({ param: 'competitors=' + ids.join(','), keep: g => teamSet.has(Number(g.homeCompetitor && g.homeCompetitor.id)) || teamSet.has(Number(g.awayCompetitor && g.awayCompetitor.id)) }));
+    // ליגות: המסלול המהיר עם תאריכים (נבדק מול 365). קבוצות: דפי ה-fixtures (כמו בגרסה 2.0), והמהיר כגיבוי
+    chunk(competitionIds, 12).forEach(ids => jobs.push({ param: 'competitions=' + ids.join(','), fast: true, keep: g => compSet.has(Number(g.competitionId)) }));
+    chunk(teamIds, 12).forEach(ids => jobs.push({ param: 'competitors=' + ids.join(','), fast: false, keep: g => teamSet.has(Number(g.homeCompetitor && g.homeCompetitor.id)) || teamSet.has(Number(g.awayCompetitor && g.awayCompetitor.id)) }));
     let done = 0, failed = 0, lastErr = null, next = 0;
     async function worker() {
       while (next < jobs.length) {
         const job = jobs[next++];
         let r = null;
-        try { r = await fetchRange(job.param, fromIso, toIso, isCancelled); }
+        const first = job.fast ? () => fetchRange(job.param, fromIso, toIso, isCancelled) : () => fetchFixtures(job.param, fromIso, toIso);
+        const second = job.fast ? () => fetchFixtures(job.param, fromIso, toIso) : () => fetchRange(job.param, fromIso, toIso, isCancelled);
+        try { r = await first(); }
         catch (e) {
           if (e.cancelled) throw e;
-          try { r = await fetchFixtures(job.param, fromIso, toIso); } catch (e2) { failed++; lastErr = e2; }
+          check(isCancelled);
+          try { r = await second(); } catch (e2) { if (e2.cancelled) throw e2; failed++; lastErr = e2; }
         }
         if (r) {
           r.games.forEach((g, id) => { if (job.keep(g)) allGames.set(id, g); });
