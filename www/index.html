@@ -1,0 +1,2386 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d1117">
+<title>לוח משחקים שבועי להקראה קולית</title>
+<style>
+:root { --bg-main: #0d1117; --bg-card: #161b22; --bg-card-hover: #21262d; --accent-green: #2ea043; --accent-green-hover: #3fb950; --accent-blue: #58a6ff; --accent-gold: #f1e05a; --accent-orange: #f0883e; --text-main: #c9d1d9; --text-bright: #f0f6fc; --text-muted: #8b949e; --border: #30363d; --radius: 12px; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 'Rubik', 'Noto Sans Hebrew', sans-serif; }
+body { background-color: var(--bg-main); color: var(--text-main); padding: 20px; padding-top: max(20px, env(safe-area-inset-top)); padding-bottom: max(20px, env(safe-area-inset-bottom)); min-height: 100vh; }
+.container { max-width: 900px; margin: 0 auto; }
+header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
+header h1 { color: var(--text-bright); font-size: 1.7rem; margin-bottom: 6px; }
+header p { color: var(--text-muted); font-size: 0.95rem; }
+.version-tag { display: inline-block; font-size: 0.75rem; color: var(--text-muted); border: 1px solid var(--border); border-radius: 10px; padding: 1px 8px; margin-inline-start: 6px; vertical-align: middle; }
+.hero { background: linear-gradient(135deg, #12263f, #161b22); border: 1px solid #1f6feb55; border-radius: var(--radius); padding: 16px 18px; margin-bottom: 18px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.hero p { color: var(--text-main); font-size: 0.92rem; flex: 1; min-width: 220px; line-height: 1.5; }
+.controls-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; background: var(--bg-card); padding: 15px 20px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 20px; }
+.btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+button, .btn-like { background: var(--bg-card-hover); color: var(--text-bright); border: 1px solid var(--border); padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; }
+button:hover, .btn-like:hover { border-color: var(--text-muted); transform: translateY(-1px); }
+button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+button.btn-primary { background: var(--accent-green); border-color: var(--accent-green); color: #fff; }
+button.btn-primary:hover { background: var(--accent-green-hover); }
+button.btn-auto { background: #1f6feb; border-color: #1f6feb; color: #fff; font-size: 1.05rem; padding: 12px 22px; }
+button.btn-auto:hover { background: #388bfd; }
+button.btn-danger { background: #da3633; border-color: #da3633; color: #fff; }
+button.btn-manage, .btn-like.btn-manage { background: #9e6a03; border-color: #9e6a03; color: #fff; }
+button.btn-export { background: #238636; border-color: #238636; color: #fff; }
+button.btn-small { padding: 6px 12px; font-size: 0.82rem; }
+.speed-slider { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted); flex-wrap: wrap; }
+.toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; color: var(--text-bright); cursor: pointer; user-select: none; }
+.toggle input { width: 18px; height: 18px; accent-color: var(--accent-green); }
+details.manual-add { margin-bottom: 25px; }
+details.manual-add > summary { cursor: pointer; color: var(--text-muted); font-size: 0.95rem; padding: 10px 4px; list-style: none; }
+details.manual-add > summary::before { content: "▸ "; }
+details.manual-add[open] > summary::before { content: "▾ "; }
+.add-form { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; align-items: flex-end; }
+.add-form .full-row { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label { font-size: 0.8rem; color: var(--text-muted); }
+input, select, textarea { background: var(--bg-main); border: 1px solid var(--border); color: var(--text-bright); padding: 8px 12px; border-radius: 6px; outline: none; font-size: 0.9rem; width: 100%; }
+input[type=checkbox] { width: auto; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent-blue); }
+.day-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 20px; overflow: hidden; }
+.day-header { background: #1c2128; padding: 12px 20px; border-bottom: 1px solid var(--border); font-size: 1.1rem; font-weight: bold; color: var(--accent-gold); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.league-block { padding: 15px 20px; border-bottom: 1px dashed var(--border); }
+.league-block:last-child { border-bottom: none; }
+.league-title { color: var(--accent-blue); font-size: 0.95rem; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.match-row { display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); padding: 10px 15px; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
+.match-row:last-child { margin-bottom: 0; }
+.match-teams { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 500; flex-wrap: wrap; }
+.badge-home { background: rgba(46, 160, 67, 0.15); color: var(--accent-green-hover); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; }
+.badge-warn { background: rgba(240, 136, 62, 0.15); color: var(--accent-orange); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; }
+.badge-info { background: rgba(88, 166, 255, 0.12); color: var(--accent-blue); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; }
+.no-nikud { color: var(--accent-orange) !important; border-bottom: 1px dotted var(--accent-orange); }
+.match-time { font-weight: bold; color: var(--text-bright); background: var(--bg-card-hover); padding: 4px 10px; border-radius: 6px; font-size: 0.9rem; }
+.match-time small { color: var(--text-muted); font-weight: normal; margin-inline-start: 6px; }
+.match-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.icon-btn { padding: 6px 10px; font-size: 0.8rem; background: transparent; }
+.output-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 15px; margin-top: 20px; }
+.output-box textarea { width: 100%; height: 220px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 6px; color: var(--text-bright); padding: 10px; font-size: 1rem; line-height: 1.7; resize: vertical; margin-bottom: 10px; white-space: pre-wrap; }
+.warn-box { background: rgba(240, 136, 62, 0.1); border: 1px solid #f0883e55; color: var(--text-bright); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; font-size: 0.88rem; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--accent-green); color: #fff; padding: 10px 20px; border-radius: 20px; font-weight: bold; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 3000; max-width: 92vw; text-align: center; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.active { display: flex; }
+.modal-overlay.top { z-index: 2200; }
+.modal-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; width: 100%; max-width: 680px; max-height: 92vh; overflow-y: auto; }
+.modal-box.wide { max-width: 820px; }
+.modal-box h2 { color: var(--text-bright); font-size: 1.25rem; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.modal-section { border-top: 1px dashed var(--border); padding-top: 15px; margin-top: 15px; }
+.modal-section:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+.modal-section h3 { font-size: 1rem; color: var(--accent-blue); margin-bottom: 10px; }
+details.modal-section > summary { cursor: pointer; color: var(--accent-blue); font-weight: bold; font-size: 0.95rem; }
+.inline-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.inline-row > * { flex: 1; min-width: 140px; }
+.team-chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; max-height: 180px; overflow-y: auto; padding: 5px; background: rgba(0,0,0,0.15); border-radius: 8px; }
+.team-chip { background: var(--bg-card-hover); border: 1px solid var(--border); border-radius: 20px; padding: 5px 8px 5px 14px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; }
+.team-chip button { padding: 2px 7px; border-radius: 50%; border: none; background: #da3633; color: #fff; font-size: 0.7rem; line-height: 1; }
+.empty-hint { color: var(--text-muted); font-size: 0.85rem; margin-top: 8px; line-height: 1.5; }
+.backup-box { background: #1c2128; border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; margin: 6px 0; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent-green); }
+.status-line { margin: 10px 0; font-size: 0.9rem; color: var(--text-muted); white-space: pre-line; }
+.status-line.err { color: #ff7b72; }
+.status-line.ok { color: var(--accent-green-hover); }
+.fav-row { display: flex; align-items: center; gap: 6px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.fav-row input { flex: 1; min-width: 150px; padding: 6px 10px; }
+.fav-row .meta { color: var(--text-muted); font-size: 0.78rem; }
+.fav-row button { padding: 5px 9px; font-size: 0.8rem; }
+.imp-day { border: 1px solid var(--border); border-radius: 10px; margin-top: 12px; overflow: hidden; }
+.imp-day-head { background: #1c2128; padding: 8px 12px; color: var(--accent-gold); font-weight: bold; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.imp-league { padding: 8px 12px; border-top: 1px dashed var(--border); }
+.imp-league-name { color: var(--accent-blue); font-weight: bold; font-size: 0.9rem; margin-bottom: 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.imp-match { display: flex; align-items: center; gap: 10px; padding: 6px 4px; border-radius: 6px; cursor: pointer; flex-wrap: wrap; font-size: 0.92rem; }
+.imp-match:hover { background: var(--bg-card-hover); }
+.imp-match input { width: 18px; height: 18px; accent-color: var(--accent-green); }
+.imp-match .t { font-weight: bold; color: var(--text-bright); min-width: 44px; }
+.imp-match.dim { opacity: 0.55; }
+.review-box { background: #1c2128; border: 1px solid #f0883e55; border-radius: 10px; padding: 12px; margin-top: 12px; }
+.review-box h4 { color: var(--accent-orange); margin-bottom: 6px; font-size: 0.95rem; }
+.review-row { display: grid; grid-template-columns: minmax(110px, 1fr) minmax(150px, 1.4fr) auto; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--border); }
+.review-row:last-child { border-bottom: none; }
+.review-row .plain { font-size: 0.88rem; color: var(--text-muted); }
+.review-row input { font-size: 1rem; }
+.review-row .acts { display: flex; gap: 4px; align-items: center; }
+.review-row .acts button { padding: 5px 8px; font-size: 0.8rem; }
+.sticky-bar { position: sticky; bottom: -22px; background: var(--bg-card); border-top: 1px solid var(--border); padding: 12px 0 4px; margin-top: 12px; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.picker-list { max-height: 50vh; overflow-y: auto; margin-top: 10px; border: 1px solid var(--border); border-radius: 8px; }
+.picker-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.picker-item:last-child { border-bottom: none; }
+.picker-item:hover { background: var(--bg-card-hover); }
+.picker-item input { width: 18px; height: 18px; accent-color: var(--accent-green); }
+.picker-item .meta { color: var(--text-muted); font-size: 0.8rem; margin-inline-start: auto; }
+.dict-row { display: grid; grid-template-columns: minmax(90px, 1fr) minmax(150px, 1.5fr) auto; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--border); }
+.dict-row .k { font-size: 0.85rem; color: var(--text-muted); word-break: break-word; }
+.dict-row .acts { display: flex; gap: 4px; }
+.dict-row .acts button { padding: 5px 8px; font-size: 0.8rem; }
+.dict-list { max-height: 45vh; overflow-y: auto; margin-top: 8px; }
+.hidden { display: none !important; }
+body.native .web-only { display: none !important; }
+body:not(.native) .app-only { display: none !important; }
+@media (max-width: 600px) {
+  body { padding: 10px; padding-top: max(10px, env(safe-area-inset-top)); padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+  header h1 { font-size: 1.3rem; }
+  .controls-bar { padding: 12px; }
+  button { padding: 9px 13px; font-size: 0.88rem; }
+  .day-header, .league-block { padding: 10px 12px; }
+  .modal-overlay { padding: 6px; }
+  .modal-box { padding: 14px; max-height: 96vh; }
+  .review-row, .dict-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>⚽ לוח משחקים שבועי להקראה קולית <span class="version-tag">2.0</span></h1>
+  <p>משיכה אוטומטית מ-365Scores, ניקוד מלא והכנת טקסט לבוט</p>
+</header>
+
+<div class="hero">
+  <p><strong>פעם בשבוע:</strong> לוחצים "משיכה אוטומטית", מסמנים אילו משחקים נכנסים, ומעתיקים לבוט. הליגות שבחרת נשמרות, וכל שם שנוקד פעם אחת נשמר במילון לתמיד.</p>
+  <div class="btn-group" style="justify-content:center;">
+    <button class="btn-auto" onclick="openImportModal()">📡 משיכה אוטומטית מ-365</button>
+    <a class="btn-like web-only" style="text-decoration:none;" href="https://github.com/i0533101089-debug/luach-mischakim/releases/latest/download/luach-mischakim.apk">📲 אפליקציה לאנדרואיד</a>
+  </div>
+</div>
+
+<div class="controls-bar">
+  <div class="btn-group">
+    <button class="btn-primary" onclick="playAll()">🔊 השמע הכל</button>
+    <button onclick="stopSpeech()">⏹️ עצור</button>
+    <button class="btn-export" onclick="copyFormattedText()">📋 העתק טקסט לבוט</button>
+    <button class="btn-export app-only" onclick="shareFormattedText()">📤 שלח לבוט</button>
+    <button class="web-only" onclick="recordAllToMp3()">🎙️ הקלט הכל להורדת MP3</button>
+    <button onclick="openDictModal()">📖 מילון ניקוד</button>
+    <button class="btn-manage" onclick="openManageModal()">⚙️ ניהול ליגות ומאגר קבוצות</button>
+    <button id="undoImportBtn" class="hidden" onclick="undoLastImport()">↩️ בטל משיכה אחרונה</button>
+  </div>
+  <div class="speed-slider">
+    <label class="toggle"><input type="checkbox" id="nikudToggle" onchange="onNikudToggle()"> ✨ ניקוד מלא בטקסט</label>
+    <label for="rate">מהירות:</label>
+    <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1" style="width:100px;">
+  </div>
+</div>
+
+<details class="manual-add">
+<summary>➕ הוספת משחק ידנית</summary>
+<div class="add-form">
+  <div class="form-group">
+    <label>יום בשבוע</label>
+    <select id="inputDow">
+      <option>ראשון</option>
+      <option>שני</option>
+      <option>שלישי</option>
+      <option>רביעי</option>
+      <option>חמישי</option>
+      <option>שישי</option>
+      <option>שבת</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>תאריך בחודש</label>
+    <input type="number" id="inputDate" min="1" max="31" placeholder="למשל 3">
+  </div>
+  <div class="form-group">
+    <label>חודש</label>
+    <select id="inputMonth">
+      <option>ינואר</option>
+      <option>פברואר</option>
+      <option>מרץ</option>
+      <option>אפריל</option>
+      <option>מאי</option>
+      <option>יוני</option>
+      <option>יולי</option>
+      <option>אוגוסט</option>
+      <option>ספטמבר</option>
+      <option>אוקטובר</option>
+      <option>נובמבר</option>
+      <option>דצמבר</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>שנה</label>
+    <input type="number" id="inputYear" value="2026">
+  </div>
+
+  <div class="full-row">
+    <div class="form-group">
+      <label>ליגה</label>
+      <select id="inputLeagueSelect" onchange="onLeagueSelectChange()"></select>
+    </div>
+    <div class="form-group hidden" id="newLeagueNameWrap">
+      <label>שם הליגה החדשה</label>
+      <input type="text" id="inputNewLeagueName" placeholder="שם ליגה">
+    </div>
+    <div class="form-group">
+      <label>מארחת (צד ימין)</label>
+      <select id="inputHomeSelect" onchange="onTeamSelectChange('home')"></select>
+      <input type="text" id="inputHomeFree" class="hidden" list="masterTeamsDatalist" placeholder="שם קבוצה מארחת">
+    </div>
+    <div class="form-group">
+      <label>אורחת</label>
+      <select id="inputAwaySelect" onchange="onTeamSelectChange('away')"></select>
+      <input type="text" id="inputAwayFree" class="hidden" list="masterTeamsDatalist" placeholder="שם קבוצה אורחת">
+    </div>
+    <div class="form-group">
+      <label>שעה</label>
+      <select id="inputTime"></select>
+    </div>
+    <div class="form-group">
+      <label>הערת ליגה (אופציונלי)</label>
+      <input type="text" id="inputLeagueNote" placeholder="למשל: מחזור 5, גמר...">
+    </div>
+  </div>
+
+  <div class="full-row">
+    <button class="btn-primary" onclick="addMatchFromForm()">➕ הוסף משחק</button>
+  </div>
+</div>
+</details>
+
+<datalist id="masterTeamsDatalist"></datalist>
+
+<div id="scheduleContainer"></div>
+
+<div id="totalMatchesDisplay" style="text-align:center; margin: 4px 0 22px; font-weight:bold; color: var(--text-bright); font-size:1rem;"></div>
+
+<div class="output-box">
+  <h3 style="color:var(--text-bright); margin-bottom:10px;">📝 תצוגה מקדימה של הטקסט המלא לבוט:</h3>
+  <div id="nikudWarn" class="warn-box hidden"></div>
+  <textarea id="outputArea" readonly></textarea>
+  <div class="btn-group">
+    <button class="btn-export" onclick="copyFormattedText()">📋 העתק את כל הטקסט להדבקה בבוט</button>
+    <button class="btn-export app-only" onclick="shareFormattedText()">📤 שלח לבוט / לוואטסאפ</button>
+    <button class="btn-export" onclick="downloadOutputText()">⬇️ הורד טקסט לקובץ</button>
+  </div>
+</div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ========== מודאל משיכה אוטומטית ========== -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal-box wide">
+    <h2>
+      <span>📡 משיכת משחקים אוטומטית מ-365Scores</span>
+      <button class="icon-btn" onclick="closeImportModal()">✖ סגור</button>
+    </h2>
+
+    <div class="modal-section">
+      <h3>1️⃣ טווח תאריכים</h3>
+      <div class="inline-row">
+        <div class="form-group"><label>מתאריך</label><input type="date" id="impFrom"></div>
+        <div class="form-group"><label>עד תאריך (כולל)</label><input type="date" id="impTo"></div>
+      </div>
+      <div class="btn-group" style="margin-top:8px;">
+        <button class="btn-small" onclick="setImportRange(0, 6)">היום + 6 ימים</button>
+        <button class="btn-small" onclick="setImportRange(1, 7)">ממחר + 6 ימים</button>
+        <button class="btn-small" onclick="setImportRange(0, 0)">רק היום</button>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <h3>2️⃣ הליגות שלי <span style="color:var(--text-muted); font-weight:normal; font-size:0.85rem;">(הסדר כאן = סדר ההקראה; אפשר לשנות את השם שיוקרא)</span></h3>
+      <div id="favList"></div>
+      <div class="btn-group" style="margin-top:8px;">
+        <button class="btn-manage" onclick="openLeaguePicker()">🔍 בחירת ליגות מתוך 365</button>
+      </div>
+      <div class="inline-row" style="margin-top:10px;">
+        <input type="text" id="favLinkInput" placeholder="או: הדבק קישור לליגה מאתר 365Scores (או מספר ליגה)">
+        <button style="flex:0 0 auto;" onclick="addFavoriteFromLink()">➕ הוסף</button>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <h3>3️⃣ משיכה ובחירת משחקים</h3>
+      <label class="check"><input type="checkbox" id="impReplace"> להחליף את הלוח הקיים בלוח החדש (אפשר לבטל אחר כך)</label>
+      <label class="check"><input type="checkbox" id="impRound"> להוסיף את מספר המחזור כהערת ליגה (למשל: מחזור 7)</label>
+      <button class="btn-auto" style="margin-top:8px;" id="impFetchBtn" onclick="runImportFetch()">📡 משוך משחקים</button>
+      <div id="impStatus" class="status-line"></div>
+      <div id="impReview"></div>
+      <div id="impResults"></div>
+      <div id="impApplyBar" class="sticky-bar hidden">
+        <div class="btn-group">
+          <button class="btn-small" onclick="setAllImportChecks(true)">סמן הכל</button>
+          <button class="btn-small" onclick="setAllImportChecks(false)">נקה הכל</button>
+        </div>
+        <button class="btn-primary" id="impApplyBtn" onclick="applyImport()">➕ הוסף ללוח</button>
+      </div>
+    </div>
+
+    <details class="modal-section">
+      <summary>🛠️ הגדרות מתקדמות ובדיקת חיבור</summary>
+      <div style="margin-top:12px;">
+        <button onclick="testConnections()">🧪 בדיקת חיבור ל-365 ולנקדן</button>
+        <div id="connTest" class="status-line"></div>
+        <label class="check web-only"><input type="checkbox" id="setUseProxy" onchange="saveAdvancedSettings()"> בדפדפן: להשתמש בשרת מתווך אם החיבור הישיר נחסם</label>
+        <div class="form-group web-only" style="margin-top:8px;">
+          <label>שרתים מתווכים (שורה לכל אחד, {url} = הכתובת)</label>
+          <textarea id="setProxies" rows="3" onchange="saveAdvancedSettings()" dir="ltr"></textarea>
+        </div>
+        <div class="form-group" style="margin-top:8px;">
+          <label>כתובות הנקדן של דיקטה (שורה לכל אחת)</label>
+          <textarea id="setDicta" rows="3" onchange="saveAdvancedSettings()" dir="ltr"></textarea>
+        </div>
+        <div class="inline-row" style="margin-top:8px;">
+          <div class="form-group"><label>מדינת משתמש ב-365 (userCountryId)</label><input type="number" id="setCountry" onchange="saveAdvancedSettings()"></div>
+          <div class="form-group"><label>שפה ב-365 (langId, 2 = עברית)</label><input type="number" id="setLang" onchange="saveAdvancedSettings()"></div>
+        </div>
+        <button class="btn-small" style="margin-top:8px;" onclick="resetAdvancedSettings()">↺ החזר לברירת מחדל</button>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ========== מודאל בחירת ליגות ========== -->
+<div class="modal-overlay top" id="pickerModal">
+  <div class="modal-box">
+    <h2>
+      <span>🔍 בחירת ליגות</span>
+      <button class="icon-btn" onclick="closeLeaguePicker()">✖ סגור</button>
+    </h2>
+    <p class="empty-hint" style="margin-top:0;">הסריקה עוברת על כל המשחקים בטווח התאריכים שבחרת ומציגה כל ליגה שמשחקת בו. מסמנים את הליגות שאתה עוקב אחריהן ושומרים — מהפעם הבאה זה אוטומטי.</p>
+    <button class="btn-manage" id="pickerScanBtn" onclick="scanLeagues()">🔄 סרוק ליגות בטווח</button>
+    <div id="pickerStatus" class="status-line"></div>
+    <input type="text" id="pickerSearch" placeholder="חיפוש ליגה או מדינה..." oninput="renderPicker()">
+    <div id="pickerList" class="picker-list"></div>
+    <div style="text-align:center; margin-top:12px;">
+      <button class="btn-primary" onclick="savePicker()">💾 שמור ליגות מסומנות</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== מודאל מילון ניקוד ========== -->
+<div class="modal-overlay" id="dictModal">
+  <div class="modal-box wide">
+    <h2>
+      <span>📖 מילון ניקוד לשמות</span>
+      <button class="icon-btn" onclick="closeDictModal()">✖ סגור</button>
+    </h2>
+    <p class="empty-hint" style="margin-top:0;">כל שם קבוצה או ליגה שמופיע בטקסט מוחלף אוטומטית בגרסה המנוקדת שלו מהמילון. מתקנים פעם אחת — וזה נשמר לתמיד.</p>
+    <div id="dictMissing"></div>
+    <div class="modal-section">
+      <h3>➕ הוספת שם</h3>
+      <div class="inline-row">
+        <input type="text" id="dictNewPlain" placeholder="השם כמו שהוא מופיע (בלי ניקוד)">
+        <input type="text" id="dictNewVocal" placeholder="השם המנוקד">
+        <button style="flex:0 0 auto;" onclick="dictAddNew()">➕ הוסף</button>
+      </div>
+    </div>
+    <div class="modal-section">
+      <h3>📚 כל השמות במילון <span id="dictCount" style="color:var(--text-muted); font-weight:normal;"></span></h3>
+      <div class="inline-row">
+        <input type="text" id="dictSearch" placeholder="חיפוש..." oninput="renderDictList()">
+        <label class="check" style="flex:0 0 auto;"><input type="checkbox" id="dictOnlyAuto" onchange="renderDictList()"> רק שנוקדו אוטומטית (לבדיקה)</label>
+      </div>
+      <div id="dictList" class="dict-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== מודאל ניהול ליגות, מאגר וגיבוי ========== -->
+<div class="modal-overlay" id="manageModal">
+  <div class="modal-box">
+    <h2>
+      <span>⚙️ ניהול ליגות, מאגר וקבוצות</span>
+      <button class="icon-btn" onclick="closeManageModal()">✖ סגור</button>
+    </h2>
+
+    <div class="modal-section">
+      <h3>💾 גיבוי ושחזור מערכת מלא</h3>
+      <div class="backup-box">
+        <div class="inline-row">
+          <button class="btn-export" onclick="exportFullBackup()">📤 יצוא גיבוי מלא (קובץ JSON)</button>
+          <label class="btn-like btn-manage" style="text-align:center; cursor:pointer; justify-content:center;">
+            📥 יבוא נתונים מקובץ גיבוי
+            <input type="file" accept=".json,application/json" class="hidden" onchange="importFullBackup(event)">
+          </label>
+        </div>
+        <p class="empty-hint">הגיבוי כולל עכשיו גם את מילון הניקוד והליגות המועדפות. אפשר לטעון גם גיבוי ישן מגרסה 1.0.9 — השחזור מחליף את הנתונים הקיימים.</p>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <h3>📁 מאגר קבוצות כללי (לחיפוש והשלמה אוטומטית)</h3>
+      <div class="inline-row">
+        <label class="btn-like btn-manage" style="text-align:center; cursor:pointer; justify-content:center;">
+          📥 טען מאגר מאקסל
+          <input type="file" id="managePoolExcelInput" accept=".xlsx,.xls" class="hidden" onchange="manageImportPoolExcel()">
+        </label>
+        <button class="btn-export" onclick="exportPoolToExcel()">📤 יצוא מאגר לאקסל</button>
+      </div>
+      <div class="inline-row" style="margin-top:10px;">
+        <input type="text" id="manageNewPoolTeamInput" placeholder="שם קבוצה חדשה למאגר">
+        <button class="btn-primary" onclick="manageAddPoolTeam()">➕ הוסף למאגר</button>
+      </div>
+      <button class="btn-danger" style="margin-top:10px;" onclick="manageClearPool()">🗑️ מחיקת כל המאגר הכללי</button>
+      <div class="team-chip-list" id="managePoolTeamChips"></div>
+    </div>
+
+    <div class="modal-section">
+      <h3>➕ הוספת ליגה חדשה</h3>
+      <div class="inline-row">
+        <input type="text" id="manageNewLeagueName" placeholder="שם הליגה החדשה">
+        <button class="btn-primary" onclick="manageAddLeague()">הוסף ליגה</button>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <h3>🏆 עריכת קבוצות בליגה וייצוא</h3>
+      <div class="form-group">
+        <label>בחר ליגה לעריכה</label>
+        <select id="manageLeagueSelect" onchange="onManageLeagueChange()"></select>
+      </div>
+      <div class="inline-row" style="margin-top:10px;">
+        <input type="text" id="manageRenameLeagueInput" placeholder="שם חדש לליגה">
+        <button onclick="manageRenameLeague()">✏️ שנה שם ליגה</button>
+        <button class="btn-export" onclick="exportCurrentLeagueToExcel()">📤 יצוא ליגה זו לאקסל</button>
+      </div>
+      <div class="inline-row" style="margin-top:10px;">
+        <input type="text" id="manageNewTeamName" placeholder="שם קבוצה חדשה">
+        <button class="btn-primary" onclick="manageAddTeam()">➕ הוסף קבוצה</button>
+      </div>
+      <div class="inline-row" style="margin-top:10px;">
+        <label class="btn-like btn-manage" style="text-align:center; cursor:pointer; justify-content:center;">
+          📥 טען קבוצות מאקסל לליגה
+          <input type="file" id="manageExcelInput" accept=".xlsx,.xls" class="hidden" onchange="manageImportExcel()">
+        </label>
+      </div>
+      <div class="team-chip-list" id="manageTeamChips"></div>
+      <p class="empty-hint" id="manageEmptyHint">אין עדיין קבוצות בליגה הזו. הוסף קבוצה למעלה.</p>
+      <button class="btn-danger" style="margin-top:12px;" onclick="manageDeleteLeague()">🗑️ מחק ליגה זו לגמרי</button>
+    </div>
+
+    <div class="modal-section" style="text-align:center;">
+      <button class="btn-primary" onclick="closeManageModal()">💾 שמור וסגור</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== מודאל עריכת משחק בודד ========== -->
+<div class="modal-overlay" id="editMatchModal">
+  <div class="modal-box" style="max-width:480px;">
+    <h2>
+      <span>✏️ עריכת משחק</span>
+      <button class="icon-btn" onclick="closeEditMatchModal()">✖ סגור</button>
+    </h2>
+    <div class="form-group">
+      <label>קבוצה מארחת</label>
+      <input type="text" id="editHomeInput" list="masterTeamsDatalist">
+    </div>
+    <div class="form-group" style="margin-top:10px;">
+      <label>קבוצה אורחת</label>
+      <input type="text" id="editAwayInput" list="masterTeamsDatalist">
+    </div>
+    <div class="form-group" style="margin-top:10px;">
+      <label>שעה</label>
+      <select id="editTimeSelect"></select>
+    </div>
+    <div class="form-group" style="margin-top:10px;">
+      <label>הערת ליגה (אופציונלי)</label>
+      <input type="text" id="editNoteInput" placeholder="למשל: מחזור 5, גמר...">
+    </div>
+    <div style="text-align:center; margin-top:16px;">
+      <button class="btn-primary" onclick="saveEditedMatch()">💾 שמור שינויים</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js"></script>
+<script>
+"use strict";
+const APP_VERSION = "2.0";
+const NEW_LEAGUE_VALUE = "__NEW__";
+const FREE_TEAM_VALUE = "__FREE__";
+
+// =====================================================================
+//  פלטפורמה: דפדפן רגיל או אפליקציית אנדרואיד (APK)
+// =====================================================================
+function isNative() {
+  try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }
+  catch (e) { return false; }
+}
+function nativeCall(plugin, method, options) {
+  return window.Capacitor.nativePromise(plugin, method, options || {});
+}
+if (isNative()) document.body.classList.add('native');
+
+// =====================================================================
+//  מאגרי הנתונים (תואם לגרסה 1.0.9 — אותם מפתחות ב-localStorage)
+// =====================================================================
+function loadJSON(key) {
+  try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : null; } catch (e) { return null; }
+}
+let leaguesData = loadJSON('leaguesData');
+if (!leaguesData || typeof leaguesData !== 'object') {
+  leaguesData = {
+    "ליגת העל": ["מַכַּבִּי תֵּל אָבִיב", "מַכַּבִּי חֵיפָה", "הַפּוֹעֵל בְּאֵר שֶׁבַע", "מַכַּבִּי נְתַנְיָה", "מַכַּבִּי הֶרְצְלִיָּה", "בֵּיתָ\"ר יְרוּשָׁלַיִם", "הַפּוֹעֵל תֵּל אָבִיב"],
+    "הליגה הספרדית": ["בַּרְצֶלוֹנָה", "רֵיאָל מַדְרִיד", "אַתְלֶטִיק בִּילְבָּאוֹ", "אַתְלֶטִיקוֹ מַדְרִיד"],
+    "ליגת האלופות": ["רֵיאָל מַדְרִיד", "מַנְצֶ'סְטֶר סִיטִי", "בַּרְצֶלוֹנָה", "בָּאיֶירְן מִינְכֶן"]
+  };
+}
+let globalTeamsPool = loadJSON('globalTeamsPool');
+if (!globalTeamsPool || !Array.isArray(globalTeamsPool)) {
+  globalTeamsPool = [
+    "מַכַּבִּי תֵּל אָבִיב", "מַכַּבִּי חֵיפָה", "הַפּוֹעֵל בְּאֵר שֶׁבַע", "מַכַּבִּי נְתַנְיָה", "מַכַּבִּי הֶרְצְלִיָּה", "בֵּיתָ\"ר יְרוּשָׁלַיִם", "הַפּוֹעֵל תֵּל אָבִיב",
+    "בַּרְצֶלוֹנָה", "רֵיאָל מַדְרִיד", "אַתְלֶטִיק בִּילְבָּאוֹ", "אַתְלֶטִיקוֹ מַדְרִיד", "מַנְצֶ'סְטֶר סִיטִי", "בָּאיֶירְן מִינְכֶן",
+    "לִיבֶרְפּוּל", "אַרְסֶנָל", "יובנטוס", "אינטר", "פ.ס.ז'"
+  ];
+}
+let scheduleData = loadJSON('scheduleData');
+if (!scheduleData || !Array.isArray(scheduleData)) {
+  scheduleData = [
+    { day: "יום שני, 3 באוגוסט 2026", leagues: [
+        { name: "ליגת העל", matches: [
+            { home: "מַכַּבִּי תֵּל אָבִיב", away: "מַכַּבִּי חֵיפָה", time: "שמונה וחצי בערב" },
+            { home: "מַכַּבִּי נְתַנְיָה", away: "מַכַּבִּי הֶרְצְלִיָּה", time: "תשע בערב" }
+          ] },
+        { name: "הליגה הספרדית", matches: [
+            { home: "בַּרְצֶלוֹנָה", away: "אַתְלֶטִיק בִּילְבָּאוֹ", time: "עשר בלילה" }
+          ] }
+      ] },
+    { day: "יום שלישי, 4 באוגוסט 2026", leagues: [
+        { name: "ליגת האלופות", matches: [
+            { home: "רֵיאָל מַדְרִיד", away: "מַנְצֶ'סְטֶר סִיטִי", time: "עשר בלילה" }
+          ] }
+      ] }
+  ];
+}
+
+// --- חדש בגרסה 2.0 ---
+const DEFAULT_PROXIES = [
+  "https://api.codetabs.com/v1/proxy?quest={url}",
+  "https://api.allorigins.win/raw?url={url}",
+  "https://corsproxy.io/?url={url}"
+];
+const DEFAULT_DICTA = [
+  "https://nakdan-u2-1a.loadbalancer.dicta.org.il/api",
+  "https://nakdan-5-3.loadbalancer.dicta.org.il/addnikud",
+  "https://nakdan-5-1.loadbalancer.dicta.org.il/addnikud",
+  "https://nakdan-2-0.loadbalancer.dicta.org.il/api"
+];
+const DEFAULT_SETTINGS = {
+  nikudOutput: true,
+  replaceOnImport: true,
+  addRoundNote: true,
+  useProxy: true,
+  proxies: DEFAULT_PROXIES,
+  dictaEndpoints: DEFAULT_DICTA,
+  userCountryId: 6,
+  langId: 2,
+  favorites: []          // [{id, name, display, country}]
+};
+let settings = Object.assign({}, DEFAULT_SETTINGS, loadJSON('appSettings') || {});
+if (!Array.isArray(settings.favorites)) settings.favorites = [];
+if (!Array.isArray(settings.dictaEndpoints) || !settings.dictaEndpoints.includes(DEFAULT_DICTA[0])) settings.dictaEndpoints = [DEFAULT_DICTA[0], ...(settings.dictaEndpoints || []).filter(e => e !== DEFAULT_DICTA[0])];
+
+// מילון ניקוד: מפתח = השם בלי ניקוד (מנורמל) → { v: השם המנוקד, auto: נוקד אוטומטית ועוד לא נבדק }
+let nikudDict = loadJSON('nikudDict');
+if (!nikudDict || typeof nikudDict !== 'object') nikudDict = {};
+
+// אינדקסים של המשחק הנערך כרגע במודאל העריכה
+let editingDayIdx = null, editingLeagueIdx = null, editingMatchIdx = null;
+
+const COMMON_TIMES = new Set(["2:30", "14:30", "17:00", "19:00", "19:45", "20:15", "20:30", "21:45", "22:00", "22:30"]);
+const HEBREW_MONTHS = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
+const HEBREW_DOW = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+
+// ---------- שמירה מקומית ושמירה אוטומטית כל 5 שניות ----------
+function saveLeagues() { try { localStorage.setItem('leaguesData', JSON.stringify(leaguesData)); } catch (e) {} }
+function saveSchedule() { try { localStorage.setItem('scheduleData', JSON.stringify(scheduleData)); } catch (e) {} }
+function saveGlobalPool() { try { localStorage.setItem('globalTeamsPool', JSON.stringify(globalTeamsPool)); } catch (e) {} }
+function saveSettings() { try { localStorage.setItem('appSettings', JSON.stringify(settings)); } catch (e) {} }
+function saveDict() { try { localStorage.setItem('nikudDict', JSON.stringify(nikudDict)); } catch (e) {} }
+function saveAll() { saveLeagues(); saveSchedule(); saveGlobalPool(); saveSettings(); saveDict(); }
+setInterval(saveAll, 5000);
+
+function esc(s) {
+  return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+// =====================================================================
+//  ניקוד — כלים בסיסיים
+// =====================================================================
+const NIKUD_RE = /[֑-ׇֽֿׁׂׅׄ]/g;
+function stripNikud(s) { return String(s || "").replace(NIKUD_RE, ""); }
+function hasNikud(s) { return /[ְ-ׇּׁׂ]/.test(String(s || "")); }
+function hasHebrew(s) { return /[א-ת]/.test(String(s || "")); }
+// מפתח השוואה: בלי ניקוד, גרש/גרשיים אחידים, רווחים מצומצמים
+function normKey(s) {
+  return stripNikud(s)
+    .replace(/־/g, "-")
+    .replace(/[׳’‘`´]/g, "'")
+    .replace(/[״“”]/g, '"')
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+function dictGet(name) { return nikudDict[normKey(name)] || null; }
+// השם כפי שיוקרא: מהמילון אם קיים, אחרת כמו שהוא
+function vocalizeName(name) {
+  const e = dictGet(name);
+  return (e && e.v) ? e.v : name;
+}
+function dictSet(plainOrAny, vocal, auto) {
+  const k = normKey(plainOrAny);
+  if (!k) return;
+  nikudDict[k] = { v: String(vocal).trim() };
+  if (auto) nikudDict[k].auto = true;
+}
+
+// =====================================================================
+//  שעות — תווית מילולית (בלי ניקוד, כמו בגרסה הקודמת) + גרסה מנוקדת
+// =====================================================================
+const HOUR_WORDS = ["אחת", "שתיים", "שלוש", "ארבע", "חמש", "שש", "שבע", "שמונה", "תשע", "עשר", "אחת עשרה", "שתים עשרה"];
+const HOUR_NIKUD = ["אַחַת", "שְׁתַּיִם", "שָׁלוֹשׁ", "אַרְבַּע", "חָמֵשׁ", "שֵׁשׁ", "שֶׁבַע", "שְׁמוֹנֶה", "תֵּשַׁע", "עֶשֶׂר", "אַחַת עֶשְׂרֵה", "שְׁתֵּים עֶשְׂרֵה"];
+const HOUR_LAMED_NIKUD = ["לְאַחַת", "לִשְׁתַּיִם", "לְשָׁלוֹשׁ", "לְאַרְבַּע", "לְחָמֵשׁ", "לְשֵׁשׁ", "לְשֶׁבַע", "לִשְׁמוֹנֶה", "לְתֵשַׁע", "לְעֶשֶׂר", "לְאַחַת עֶשְׂרֵה", "לִשְׁתֵּים עֶשְׂרֵה"];
+const PERIOD_NIKUD = { "בלילה": "בַּלַּיְלָה", "בבוקר": "בַּבֹּקֶר", "בצהריים": "בַּצָּהֳרַיִם", "אחר הצהריים": "אַחַר הַצָּהֳרַיִם", "בערב": "בָּעֶרֶב" };
+// דקות (עם ו' החיבור): [בלי ניקוד, מנוקד]
+const MIN_UNITS = [null, ["ואחת", "וְאַחַת"], ["ושתיים", "וּשְׁתַּיִם"], ["ושלוש", "וְשָׁלוֹשׁ"], ["וארבע", "וְאַרְבַּע"], ["וחמש", "וְחָמֵשׁ"], ["ושש", "וְשֵׁשׁ"], ["ושבע", "וְשֶׁבַע"], ["ושמונה", "וּשְׁמוֹנֶה"], ["ותשע", "וְתֵשַׁע"]];
+const MIN_TEENS = { 10: ["ועשר", "וְעֶשֶׂר"], 11: ["ואחת עשרה", "וְאַחַת עֶשְׂרֵה"], 12: ["ושתים עשרה", "וּשְׁתֵּים עֶשְׂרֵה"], 13: ["ושלוש עשרה", "וּשְׁלוֹשׁ עֶשְׂרֵה"], 14: ["וארבע עשרה", "וְאַרְבַּע עֶשְׂרֵה"], 15: ["וחמש עשרה", "וַחֲמֵשׁ עֶשְׂרֵה"], 16: ["ושש עשרה", "וְשֵׁשׁ עֶשְׂרֵה"], 17: ["ושבע עשרה", "וּשְׁבַע עֶשְׂרֵה"], 18: ["ושמונה עשרה", "וּשְׁמוֹנֶה עֶשְׂרֵה"], 19: ["ותשע עשרה", "וּתְשַׁע עֶשְׂרֵה"] };
+const MIN_TENS = { 20: ["ועשרים", "וְעֶשְׂרִים"], 30: ["ושלושים", "וּשְׁלוֹשִׁים"], 40: ["וארבעים", "וְאַרְבָּעִים"], 50: ["וחמישים", "וַחֲמִשִּׁים"] };
+function minuteWords(m) {
+  if (m < 10) return MIN_UNITS[m];
+  if (m < 20) return MIN_TEENS[m];
+  const t = Math.floor(m / 10) * 10, u = m % 10;
+  if (u === 0) return MIN_TENS[t];
+  return [`${MIN_TENS[t][0]} ${MIN_UNITS[u][0]}`, `${MIN_TENS[t][1]} ${MIN_UNITS[u][1]}`];
+}
+function periodForHour(hour24) {
+  if (hour24 === 0 || hour24 >= 21 || hour24 <= 4) return "בלילה";
+  if (hour24 >= 5 && hour24 <= 11) return "בבוקר";
+  if (hour24 === 12) return "בצהריים";
+  if (hour24 >= 13 && hour24 <= 16) return "אחר הצהריים";
+  return "בערב";
+}
+function hourIndex(hour24) { const h12 = (hour24 % 12) === 0 ? 12 : (hour24 % 12); return h12 - 1; }
+// תווית שעה לכל דקה. nikud=false מחזיר בדיוק את אותן תוויות של גרסה 1.0.9 עבור רבעי שעה.
+function timeLabelHM(hour24, minute, nikud) {
+  const i = hourIndex(hour24);
+  const per = periodForHour(hour24);
+  const W = nikud ? HOUR_NIKUD[i] : HOUR_WORDS[i];
+  const P = nikud ? PERIOD_NIKUD[per] : per;
+  if (minute === 0) return `${W} ${P}`;
+  if (minute === 15) return nikud ? `${W} וָרֶבַע ${P}` : `${W} ורבע ${P}`;
+  if (minute === 30) return nikud ? `${W} וָחֵצִי ${P}` : `${W} וחצי ${P}`;
+  if (minute === 45) {
+    const nh = (hour24 + 1) % 24, ni = hourIndex(nh), np = periodForHour(nh);
+    return nikud ? `רֶבַע ${HOUR_LAMED_NIKUD[ni]} ${PERIOD_NIKUD[np]}` : `רבע ל${HOUR_WORDS[ni]} ${np}`;
+  }
+  const mw = minuteWords(minute);
+  return nikud ? `${W} ${mw[1]} דַּקּוֹת ${P}` : `${W} ${mw[0]} דקות ${P}`;
+}
+function hebrewTimeLabel(hour24, quarter) { return timeLabelHM(hour24, quarter * 15, false); }
+function numericTime(hour24, minute) { return `${hour24}:${String(minute).padStart(2, "0")}`; }
+// טבלאות המרה: תווית רגילה → מנוקדת, ותווית → "20:30"
+const TIME_NIKUD_MAP = new Map();
+const TIME_NUM_MAP = new Map();
+const TIME_SORT_MAP = new Map();
+for (let h = 0; h < 24; h++) {
+  for (let m = 0; m < 60; m++) {
+    const plain = timeLabelHM(h, m, false);
+    if (!TIME_NIKUD_MAP.has(plain)) {
+      TIME_NIKUD_MAP.set(plain, timeLabelHM(h, m, true));
+      TIME_NUM_MAP.set(plain, numericTime(h, m));
+      TIME_SORT_MAP.set(plain, h * 60 + m);
+    }
+  }
+}
+
+// =====================================================================
+//  ניקוד מילים קבועות (ימים, חודשים, הערות ליגה)
+// =====================================================================
+const WORD_NIKUD = {
+  "יום": "יוֹם", "ראשון": "רִאשׁוֹן", "שני": "שֵׁנִי", "שלישי": "שְׁלִישִׁי", "רביעי": "רְבִיעִי", "חמישי": "חֲמִישִׁי", "שישי": "שִׁשִּׁי", "שבת": "שַׁבָּת",
+  "בינואר": "בְּיָנוּאָר", "בפברואר": "בְּפֶבְּרוּאָר", "במרץ": "בְּמֶרְץ", "באפריל": "בְּאַפְּרִיל", "במאי": "בְּמַאי", "ביוני": "בְּיוּנִי",
+  "ביולי": "בְּיוּלִי", "באוגוסט": "בְּאוֹגוּסְט", "בספטמבר": "בְּסֶפְּטֶמְבֶּר", "באוקטובר": "בְּאוֹקְטוֹבֶּר", "בנובמבר": "בְּנוֹבֶמְבֶּר", "בדצמבר": "בְּדֶצֶמְבֶּר",
+  "מחזור": "מַחְזוֹר", "גמר": "גְּמָר", "הגמר": "הַגְּמָר", "חצי": "חֲצִי", "רבע": "רֶבַע", "שמינית": "שְׁמִינִית", "שלב": "שְׁלַב",
+  "הבתים": "הַבָּתִּים", "הליגה": "הַלִּיגָה", "משחק": "מִשְׂחָק", "חוזר": "חוֹזֵר", "גומלין": "גּוֹמְלִין", "פלייאוף": "פְּלֵייאוֹף",
+  "עליון": "עֶלְיוֹן", "תחתון": "תַּחְתּוֹן", "דרבי": "דֶּרְבִּי", "סיבוב": "סִבּוּב", "מוקדמות": "מוּקְדָּמוֹת", "בית": "בַּיִת",
+  "פלייאוף עליון": "פְּלֵייאוֹף עֶלְיוֹן", "נוקאאוט": "נוֹקְאָאוּט", "ידידות": "יְדִידוּת", "סופר": "סוּפֶּר", "קאפ": "קַאפּ",
+  "עונה": "עוֹנָה", "רגילה": "רְגִילָה", "השמינית": "הַשְּׁמִינִית", "אחרון": "אַחֲרוֹן", "מחזורי": "מַחְזוֹרֵי",
+  // מילות שעה — לגיבוי, אם נשמרה תווית שעה בניסוח אחר
+  "אחת": "אַחַת", "שתיים": "שְׁתַּיִם", "שלוש": "שָׁלוֹשׁ", "ארבע": "אַרְבַּע", "חמש": "חָמֵשׁ", "שש": "שֵׁשׁ", "שבע": "שֶׁבַע",
+  "שמונה": "שְׁמוֹנֶה", "תשע": "תֵּשַׁע", "עשר": "עֶשֶׂר", "עשרה": "עֶשְׂרֵה", "שתים": "שְׁתֵּים", "ורבע": "וָרֶבַע", "וחצי": "וָחֵצִי",
+  "לאחת": "לְאַחַת", "לשתיים": "לִשְׁתַּיִם", "לשלוש": "לְשָׁלוֹשׁ", "לארבע": "לְאַרְבַּע", "לחמש": "לְחָמֵשׁ", "לשש": "לְשֵׁשׁ",
+  "לשבע": "לְשֶׁבַע", "לשמונה": "לִשְׁמוֹנֶה", "לתשע": "לְתֵשַׁע", "לעשר": "לְעֶשֶׂר", "לשתים": "לִשְׁתֵּים",
+  "בלילה": "בַּלַּיְלָה", "בבוקר": "בַּבֹּקֶר", "בצהריים": "בַּצָּהֳרַיִם", "אחר": "אַחַר", "הצהריים": "הַצָּהֳרַיִם", "בערב": "בָּעֶרֶב", "דקות": "דַּקּוֹת"
+};
+function vocalizeWords(text) {
+  return String(text || "").split(/(\s+|[,.:;()\[\]\-–—!?\/]+)/).map(tok => {
+    if (!tok || hasNikud(tok)) return tok;
+    return WORD_NIKUD[tok] || tok;
+  }).join("");
+}
+function vocalizeTime(t) { return TIME_NIKUD_MAP.get(String(t || "").trim()) || vocalizeWords(t); }
+
+// =====================================================================
+//  מילון שמות מובנה (קבוצות וליגות נפוצות) — אפשר לערוך הכל במסך "מילון ניקוד"
+// =====================================================================
+const BUILTIN_NAMES = [
+  // ליגות
+  "לִיגַת הָעַל", "הַלִּיגָה הַלְּאוּמִּית", "גְּבִיעַ הַמְּדִינָה", "גְּבִיעַ הַטּוֹטוֹ", "לִיגַת הָאַלּוּפוֹת", "הַלִּיגָה הָאֵירוֹפִּית", "לִיגַת הַקּוֹנְפֶרֶנְס",
+  "פְּרֶמְיֶיר לִיג", "הַפְּרֶמְיֶיר לִיג", "לָה לִיגָה", "בּוּנְדֶסְלִיגָה", "לִיג 1", "הַלִּיגָה הָאַנְגְּלִית", "הַלִּיגָה הַסְּפָרַדִּית", "הַלִּיגָה הָאִיטַלְקִית",
+  "הַלִּיגָה הַגֶּרְמָנִית", "הַלִּיגָה הַצָּרְפָתִית", "הַגָּבִיעַ הָאַנְגְּלִי", "גְּבִיעַ הַלִּיגָה", "גְּבִיעַ הַמֶּלֶךְ", "גְּבִיעַ הָעוֹלָם", "לִיגַת הָאוּמּוֹת", "הַסּוּפֶּר קַאפּ",
+  // ישראל
+  "מַכַּבִּי תֵּל אָבִיב", "מַכַּבִּי חֵיפָה", "הַפּוֹעֵל בְּאֵר שֶׁבַע", "בֵּיתָ\"ר יְרוּשָׁלַיִם", "הַפּוֹעֵל תֵּל אָבִיב", "הַפּוֹעֵל חֵיפָה", "הַפּוֹעֵל יְרוּשָׁלַיִם",
+  "בְּנֵי סַכְנִין", "מַכַּבִּי נְתַנְיָה", "הַפּוֹעֵל פֶּתַח תִּקְוָה", "מַכַּבִּי פֶּתַח תִּקְוָה", "עִירוֹנִי קִרְיַת שְׁמוֹנָה", "מַכַּבִּי בְּנֵי רֵיינֶה", "עִירוֹנִי טְבֶרְיָה",
+  "מ.ס. אַשְׁדּוֹד", "מַכַּבִּי הֶרְצְלִיָּה", "הַפּוֹעֵל חֲדֵרָה", "בְּנֵי יְהוּדָה", "הַפּוֹעֵל כְּפַר סָבָא", "הַפּוֹעֵל רַעֲנָנָה", "הַפּוֹעֵל רָמַת גַּן", "הַפּוֹעֵל עַכּוֹ",
+  "הַפּוֹעֵל אוּם אֶל פַחְם", "הַפּוֹעֵל נוֹף הַגָּלִיל", "הַפּוֹעֵל רִאשׁוֹן לְצִיּוֹן", "הַפּוֹעֵל כְּפַר שָׁלֵם", "הַפּוֹעֵל עַפּוּלָה", "עִירוֹנִי מוֹדִיעִין", "סֶקְצְיָה נֵס צִיּוֹנָה",
+  "מַכַּבִּי יָפוֹ", "הַפּוֹעֵל אַשְׁקְלוֹן", "הַפּוֹעֵל רָמַת גַּן גִּבְעָתַיִם",
+  // אנגליה
+  "אַרְסֶנָל", "אַסְטוֹן וִילָה", "בּוֹרְנְמוּת'", "בְּרֶנְטְפוֹרְד", "בְּרַייטוֹן", "צֶ'לְסִי", "קְרִיסְטַל פָּאלָאס", "אֶבֶרְטוֹן", "פוּלְהֶאם", "לִיבֶרְפּוּל",
+  "מַנְצֶ'סְטֶר סִיטִי", "מַנְצֶ'סְטֶר יוּנַייטֶד", "נְיוּקָאסֶל", "נְיוּקָאסֶל יוּנַייטֶד", "נוֹטִינְגְהֶאם פוֹרֶסְט", "טוֹטֶנְהֶאם", "וֶסְטְהֶאם", "וֶסְט הֶאם", "וֶסְט הֶאם יוּנַייטֶד",
+  "ווּלְבֶרְהֶמְפְּטוֹן", "לִידְס", "לִידְס יוּנַייטֶד", "בֶּרְנְלִי", "סַנְדֶרְלֶנְד", "לֶסְטֶר", "לֶסְטֶר סִיטִי", "אִיפְּסְווִיץ'", "סָאוּתְהֶמְפְּטוֹן",
+  // ספרד
+  "רֵיאָל מַדְרִיד", "בַּרְצֶלוֹנָה", "אַתְלֶטִיקוֹ מַדְרִיד", "אַתְלֶטִיק בִּילְבָּאוֹ", "רֵיאָל סוֹסְיֶאדָד", "רֵיאָל בֶּטִיס", "סֶבִיָּה", "סֶבִילְיָה", "וָלֶנְסְיָה",
+  "וִיָּאַרֵיאָל", "סֶלְטָה וִיגוֹ", "חִירוֹנָה", "אוֹסָסוּנָה", "חֵטָאפֶה", "מָיוֹרְקָה", "רָאיוֹ וַיֶּיקָאנוֹ", "אָלָאבֶס", "אֶסְפַּנְיוֹל", "לֶבָאנְטֶה", "אֶלְצֶ'ה",
+  "רֵיאָל אוֹבְיֶידוֹ", "לָאס פָּאלְמָס", "לֶגָאנֶס", "וָיָאדוֹלִיד",
+  // איטליה
+  "יוּבֶנְטוּס", "אִינְטֶר", "אִינְטֶר מִילָאן", "מִילָאן", "נָאפּוֹלִי", "רוֹמָא", "לָאצְיוֹ", "אָטָאלַנְטָה", "פִיוֹרֶנְטִינָה", "בּוֹלוֹנְיָה", "טוֹרִינוֹ",
+  "גֶ'נוֹאָה", "אוּדִינֶזֶה", "קָאלְיָארִי", "לֶצֶ'ה", "וֶרוֹנָה", "פַּארְמָה", "קוֹמוֹ", "סָסוּאוֹלוֹ", "פִּיזָה", "קְרֶמוֹנֶזֶה", "אֶמְפּוֹלִי", "מוֹנְצָה", "וֶנֶצְיָה",
+  // גרמניה
+  "בָּאיֶירְן מִינְכֶן", "בּוֹרוּסְיָה דּוֹרְטְמוּנְד", "בָּאיֶיר לֶבֶרְקוּזֶן", "לַייפְּצִיג", "אַיְינְטְרַכְט פְרַנְקְפוּרְט", "שְׁטוּטְגַרְט", "וֶרְדֶר בְּרֶמֶן",
+  "ווֹלְפְסְבּוּרְג", "פְרַייבּוּרְג", "הוֹפֶנְהַיים", "מַיינְץ", "אוּנְיוֹן בֶּרְלִין", "בּוֹרוּסְיָה מֶנְשֶׁנְגְלַדְבַּאךְ", "אָאוּגְסְבּוּרְג", "הַיידֶנְהַיים", "הַמְבּוּרְג",
+  "קֶלְן", "סַנְט פָּאוּלִי", "בּוֹכוּם", "הֶרְתָּה בֶּרְלִין", "שַׁאלְקֶה",
+  // צרפת
+  "פָּרִיז סֶן זֶ'רְמֶן", "פָּרִיס סֶן זֶ'רְמֶן", "מַרְסֵיי", "לְיוֹן", "מוֹנָקוֹ", "לִיל", "נִיס", "לַאנְס", "רֶן", "נַאנְט", "טוּלוּז", "סְטְרַסְבּוּרְג", "בְּרֶסְט", "רֵימְס", "לֶה הַאבְר",
+  // אירופה
+  "בֶּנְפִיקָה", "פּוֹרְטוֹ", "סְפּוֹרְטִינְג", "סְפּוֹרְטִינְג לִיסַבּוֹן", "אַיָּאקְס", "פֵיֶינוֹרְד", "סֶלְטִיק", "רֵיינְגֶ'רְס", "גָלָטָסָרַאי", "פֶנֶרְבַּחְצֶ'ה",
+  "בֶּשִׁיקְטָאשׁ", "זַלְצְבּוּרְג", "אוֹלִימְפְּיָאקוֹס", "קוֹפֶּנְהָגֶן", "בַּאזֶל", "יַאנְג בּוֹיְז", "סְלַאבְיָה פְּרָאג", "סְפַּרְטָה פְּרָאג", "דִּינָמוֹ זָגְרֶב",
+  "בְּרָאגָה", "אַנְדֶרְלֶכְט", "דִּינָמוֹ קִייֶב", "שַׁחְטָאר דוֹנֶצְק"
+];
+// שמות שכתובים אחרת ב-365 (קיצורים וכו') → אותו שם מנוקד
+const BUILTIN_ALIASES = [
+  ["מכבי ת\"א", "מַכַּבִּי תֵּל אָבִיב"], ["הפועל ת\"א", "הַפּוֹעֵל תֵּל אָבִיב"], ["הפועל ב\"ש", "הַפּוֹעֵל בְּאֵר שֶׁבַע"],
+  ["הפועל פ\"ת", "הַפּוֹעֵל פֶּתַח תִּקְוָה"], ["מכבי פ\"ת", "מַכַּבִּי פֶּתַח תִּקְוָה"], ["עירוני ק\"ש", "עִירוֹנִי קִרְיַת שְׁמוֹנָה"],
+  ["הפועל ראשל\"צ", "הַפּוֹעֵל רִאשׁוֹן לְצִיּוֹן"], ["ביתר ירושלים", "בֵּיתָ\"ר יְרוּשָׁלַיִם"], ["מ.ס אשדוד", "מ.ס. אַשְׁדּוֹד"],
+  ["בני ריינה", "מַכַּבִּי בְּנֵי רֵיינֶה"], ["ריאל סוסידד", "רֵיאָל סוֹסְיֶאדָד"], ["אסטון וילא", "אַסְטוֹן וִילָא"],
+  ["טוטנהאם הוטספר", "טוֹטֶנְהֶאם הוֹטְסְפֶּר"], ["וולבס", "ווּלְבְס"], ["אינטר מילאנו", "אִינְטֶר מִילָאנוֹ"],
+  ["אולימפיק ליון", "אוֹלִימְפִּיק לְיוֹן"], ["אולימפיק מרסיי", "אוֹלִימְפִּיק מַרְסֵיי"], ["ר.ב. לייפציג", "ר.ב. לַייפְּצִיג"],
+  ["אינטרכט פרנקפורט", "אַיְינְטְרַכְט פְרַנְקְפוּרְט"], ["בורוסיה מנשנגלאדבאך", "בּוֹרוּסְיָה מֶנְשֶׁנְגְלַדְבַּאךְ"]
+];
+const NIKUD_SEED_VERSION = 1;
+function seedDictionary() {
+  // 1) שמות מנוקדים שכבר יש לך במאגר ובליגות — הם קודמים לכל
+  const own = new Set(globalTeamsPool);
+  Object.values(leaguesData).forEach(arr => Array.isArray(arr) && arr.forEach(t => own.add(t)));
+  own.forEach(name => { if (hasNikud(name) && !nikudDict[normKey(name)]) dictSet(name, name, false); });
+  // 2) המילון המובנה — פעם אחת בלבד (כדי ששם שמחקת לא יחזור)
+  if (Number(localStorage.getItem('nikudSeedVersion') || 0) < NIKUD_SEED_VERSION) {
+    BUILTIN_NAMES.forEach(v => { if (!nikudDict[normKey(v)]) dictSet(v, v, false); });
+    BUILTIN_ALIASES.forEach(([plain, v]) => { if (!nikudDict[normKey(plain)]) dictSet(plain, v, false); });
+    try { localStorage.setItem('nikudSeedVersion', String(NIKUD_SEED_VERSION)); } catch (e) {}
+  }
+  saveDict();
+}
+
+// עדכון רשימת Datalist להשלמה אוטומטית של קבוצות
+function refreshMasterDatalist() {
+  const dl = document.getElementById('masterTeamsDatalist');
+  dl.innerHTML = "";
+  const allTeams = new Set([...globalTeamsPool]);
+  Object.values(leaguesData).forEach(arr => { if (Array.isArray(arr)) arr.forEach(t => allTeams.add(t)); });
+  allTeams.forEach(team => {
+    if (team && String(team).trim()) {
+      const opt = document.createElement('option');
+      opt.value = team;
+      dl.appendChild(opt);
+    }
+  });
+}
+
+// ---------- רשימת השעות בתיבת הבחירה ----------
+function buildTimeOptions(selectEl, currentVal) {
+  selectEl.innerHTML = "";
+  let defaultOpt = null;
+  for (let h = 0; h < 24; h++) {
+    for (let q = 0; q < 4; q++) {
+      const hebLabel = hebrewTimeLabel(h, q);
+      const numLabel = numericTime(h, q * 15);
+      const opt = document.createElement('option');
+      opt.value = hebLabel;
+      const isCommon = COMMON_TIMES.has(numLabel);
+      opt.textContent = isCommon ? `⭐ ${numLabel}` : numLabel;
+      if (isCommon) { opt.style.fontWeight = "800"; opt.style.color = "#f1e05a"; }
+      if (h === 20 && q === 2) defaultOpt = opt;
+      selectEl.appendChild(opt);
+    }
+  }
+  if (currentVal) {
+    selectEl.value = currentVal;
+    if (selectEl.value !== currentVal) {
+      // שעה שאינה ברבעי שעה (למשל 20:05) — מוסיפים אותה לרשימה
+      const opt = document.createElement('option');
+      opt.value = currentVal;
+      opt.textContent = TIME_NUM_MAP.get(currentVal) || currentVal;
+      selectEl.insertBefore(opt, selectEl.firstChild);
+      selectEl.value = currentVal;
+    }
+  } else if (defaultOpt) {
+    defaultOpt.selected = true;
+  }
+}
+function populateTimeSelect() { buildTimeOptions(document.getElementById('inputTime')); }
+
+// ---------- ניהול בחירת ליגות וקבוצות בטופס הידני ----------
+function refreshLeagueSelects() {
+  const sel = document.getElementById('inputLeagueSelect');
+  const current = sel.value;
+  sel.innerHTML = "";
+  Object.keys(leaguesData).forEach(leagueName => {
+    const opt = document.createElement('option');
+    opt.value = leagueName;
+    opt.textContent = leagueName;
+    sel.appendChild(opt);
+  });
+  const newOpt = document.createElement('option');
+  newOpt.value = NEW_LEAGUE_VALUE;
+  newOpt.textContent = "➕ ליגה חדשה (הזנה חופשית)";
+  sel.appendChild(newOpt);
+  if (current && (leaguesData[current] || current === NEW_LEAGUE_VALUE)) sel.value = current;
+  onLeagueSelectChange();
+  refreshMasterDatalist();
+}
+function populateTeamDropdown(sel, currentVal) {
+  const league = document.getElementById('inputLeagueSelect').value;
+  const teams = leaguesData[league] || [];
+  sel.innerHTML = "";
+  teams.forEach(team => {
+    const opt = document.createElement('option');
+    opt.value = team;
+    opt.textContent = team;
+    sel.appendChild(opt);
+  });
+  const freeOpt = document.createElement('option');
+  freeOpt.value = FREE_TEAM_VALUE;
+  freeOpt.textContent = "➕ קבוצה חדשה (הזנה חופשית / חיפוש במאגר)";
+  sel.appendChild(freeOpt);
+  if (currentVal && (teams.includes(currentVal) || currentVal === FREE_TEAM_VALUE)) sel.value = currentVal;
+}
+function onLeagueSelectChange() {
+  const league = document.getElementById('inputLeagueSelect').value;
+  const isNew = (league === NEW_LEAGUE_VALUE);
+  document.getElementById('newLeagueNameWrap').classList.toggle('hidden', !isNew);
+  const homeSelect = document.getElementById('inputHomeSelect');
+  const awaySelect = document.getElementById('inputAwaySelect');
+  const homeFree = document.getElementById('inputHomeFree');
+  const awayFree = document.getElementById('inputAwayFree');
+  if (isNew) {
+    homeSelect.classList.add('hidden');
+    awaySelect.classList.add('hidden');
+    homeFree.classList.remove('hidden');
+    awayFree.classList.remove('hidden');
+  } else {
+    homeSelect.classList.remove('hidden');
+    awaySelect.classList.remove('hidden');
+    populateTeamDropdown(homeSelect, homeSelect.value);
+    populateTeamDropdown(awaySelect, awaySelect.value);
+    onTeamSelectChange('home', true);
+    onTeamSelectChange('away', true);
+  }
+}
+function onTeamSelectChange(type, noFocus) {
+  const selectEl = document.getElementById(type === 'home' ? 'inputHomeSelect' : 'inputAwaySelect');
+  const freeEl = document.getElementById(type === 'home' ? 'inputHomeFree' : 'inputAwayFree');
+  if (selectEl.value === FREE_TEAM_VALUE) {
+    freeEl.classList.remove('hidden');
+    if (!noFocus) freeEl.focus();
+  } else {
+    freeEl.classList.add('hidden');
+  }
+}
+
+// =====================================================================
+//  לוח המשחקים — תצוגה וטקסט
+// =====================================================================
+function nameSpan(name) {
+  const shown = vocalizeName(name);
+  const missing = hasHebrew(shown) && !hasNikud(shown);
+  return `<strong class="${missing ? 'no-nikud' : ''}" ${missing ? 'title="אין ניקוד לשם הזה — אפשר להוסיף במילון הניקוד"' : ''}>${esc(shown)}</strong>`;
+}
+function renderSchedule() {
+  const container = document.getElementById("scheduleContainer");
+  container.innerHTML = "";
+  let grandTotal = 0;
+  if (scheduleData.length === 0) {
+    container.innerHTML = `<div class="day-section" style="padding:24px; text-align:center; color:var(--text-muted);">הלוח ריק. לחץ על "📡 משיכה אוטומטית מ-365" כדי למלא אותו.</div>`;
+  }
+  scheduleData.forEach((dayGroup, dayIdx) => {
+    const dayCard = document.createElement("div");
+    dayCard.className = "day-section";
+    let dayMatchCount = 0;
+    let leaguesHtml = "";
+    dayGroup.leagues.forEach((league, leagueIdx) => {
+      dayMatchCount += league.matches.length;
+      const noteSuffix = league.note ? ` (${esc(league.note)})` : "";
+      let matchesHtml = "";
+      league.matches.forEach((m, matchIdx) => {
+        const num = TIME_NUM_MAP.get(m.time);
+        matchesHtml += `
+          <div class="match-row">
+            <div class="match-teams">
+              <span class="badge-home">מארחת</span>
+              ${nameSpan(m.home)}
+              <span style="color: var(--text-muted);">נגד</span>
+              ${nameSpan(m.away)}
+            </div>
+            <div class="match-actions">
+              <span class="match-time">${num ? esc(num) + '<small>' + esc(m.time) + '</small>' : esc(m.time)}</span>
+              <button class="icon-btn" onclick="playSingleMatch(${dayIdx}, ${leagueIdx}, ${matchIdx})" title="השמע משחק">🔊</button>
+              <button class="icon-btn" onclick="openEditMatch(${dayIdx}, ${leagueIdx}, ${matchIdx})" title="ערוך משחק">✏️</button>
+              <button class="icon-btn" onclick="deleteMatch(${dayIdx}, ${leagueIdx}, ${matchIdx})" style="color: #da3633;" title="מחק">✖</button>
+            </div>
+          </div>`;
+      });
+      const leagueShown = vocalizeName(league.name);
+      const leagueMissing = hasHebrew(leagueShown) && !hasNikud(leagueShown);
+      leaguesHtml += `
+        <div class="league-block">
+          <div class="league-title">🏆 <span class="${leagueMissing ? 'no-nikud' : ''}">${esc(leagueShown)}</span>${noteSuffix}:</div>
+          ${matchesHtml}
+        </div>`;
+    });
+    grandTotal += dayMatchCount;
+    dayCard.innerHTML = `
+      <div class="day-header">
+        <span>📅 לוח המשחקים ל${esc(dayGroup.day)} <span style="color: var(--text-muted); font-size:0.8rem; font-weight:normal;">(${dayMatchCount} משחקים)</span></span>
+        <div class="match-actions">
+          <button class="icon-btn" onclick="playDay(${dayIdx})" style="color: #fff;">🔊 השמע יום זה</button>
+          <button class="icon-btn web-only" onclick="recordDayToMp3(${dayIdx})" style="color: #fff;">🎙️ MP3 ליום זה</button>
+          <button class="icon-btn" onclick="deleteDay(${dayIdx})" style="color: #ff7b72;">🗑️ מחק יום</button>
+        </div>
+      </div>
+      ${leaguesHtml}`;
+    container.appendChild(dayCard);
+  });
+  document.getElementById("totalMatchesDisplay").textContent = `סה"כ מספר המשחקים שנוספו לשבוע זה: ${grandTotal}`;
+  updateOutputText();
+}
+
+// הטקסט לבוט. כשהניקוד המלא פעיל — כל המילים מנוקדות (תבנית, ימים, שעות, ליגות וקבוצות).
+function txt(plain, nikud) { return settings.nikudOutput ? nikud : plain; }
+function outName(n) { return settings.nikudOutput ? vocalizeName(n) : n; }
+function outDay(d) { return settings.nikudOutput ? vocalizeWords(d) : d; }
+function outTime(t) { return settings.nikudOutput ? vocalizeTime(t) : t; }
+function outNote(n) { return settings.nikudOutput ? vocalizeWords(n) : n; }
+function matchLine(m) {
+  return `${outName(m.home)} ${txt('בשעה', 'בַּשָּׁעָה')} ${outTime(m.time)} ${txt('תארח את', 'תְּאָרֵחַ אֶת')} ${outName(m.away)}.`;
+}
+function leagueLine(l) {
+  const noteSuffix = l.note ? ` (${outNote(l.note)})` : "";
+  return `${outName(l.name)}${noteSuffix}:`;
+}
+function dayTitle(dayGroup) { return `${txt('לוח המשחקים ל', 'לוּחַ הַמִּשְׂחָקִים לְ')}${outDay(dayGroup.day)}`; }
+function generateFullText() {
+  let fullText = "";
+  scheduleData.forEach(dayGroup => {
+    fullText += `${dayTitle(dayGroup)}:\n\n`;
+    dayGroup.leagues.forEach(league => {
+      fullText += `${leagueLine(league)}\n`;
+      league.matches.forEach(m => { fullText += `${matchLine(m)}\n`; });
+      fullText += `\n`;
+    });
+    fullText += `------------------------------------\n\n`;
+  });
+  return fullText.trim();
+}
+function buildDayText(dayIdx) {
+  const dayGroup = scheduleData[dayIdx];
+  let text = `${dayTitle(dayGroup)}.\n`;
+  dayGroup.leagues.forEach(l => {
+    text += `${leagueLine(l)}\n`;
+    l.matches.forEach(m => { text += `${matchLine(m)}\n`; });
+  });
+  return text;
+}
+// שמות בלוח שאין להם ניקוד (לא במילון ולא מנוקדים)
+function collectMissingNikud() {
+  const missing = new Map();
+  const check = (n) => { const v = vocalizeName(n); if (n && hasHebrew(v) && !hasNikud(v)) missing.set(normKey(n), n); };
+  scheduleData.forEach(d => d.leagues.forEach(l => { check(l.name); l.matches.forEach(m => { check(m.home); check(m.away); }); }));
+  return [...missing.values()];
+}
+function updateOutputText() {
+  document.getElementById("outputArea").value = generateFullText();
+  const warn = document.getElementById("nikudWarn");
+  const missing = settings.nikudOutput ? collectMissingNikud() : [];
+  if (missing.length) {
+    warn.innerHTML = `<span>⚠️ ${missing.length} שמות בלוח עדיין בלי ניקוד: ${missing.slice(0, 6).map(esc).join(", ")}${missing.length > 6 ? "..." : ""}</span><button class="btn-small btn-manage" onclick="openDictModal()">📖 לנקד עכשיו</button>`;
+    warn.classList.remove('hidden');
+  } else {
+    warn.classList.add('hidden');
+  }
+}
+function onNikudToggle() {
+  settings.nikudOutput = document.getElementById('nikudToggle').checked;
+  saveSettings();
+  updateOutputText();
+}
+
+function addMatchFromForm() {
+  const dow = document.getElementById('inputDow').value;
+  const date = document.getElementById('inputDate').value.trim();
+  const month = document.getElementById('inputMonth').value;
+  const year = document.getElementById('inputYear').value.trim();
+  if (!date || !year) { alert("נא למלא תאריך ושנה"); return; }
+  const dayLabel = `יום ${dow}, ${date} ב${month} ${year}`;
+
+  const leagueSelectEl = document.getElementById('inputLeagueSelect');
+  const isNewLeague = (leagueSelectEl.value === NEW_LEAGUE_VALUE);
+  let league;
+  if (isNewLeague) {
+    league = document.getElementById('inputNewLeagueName').value.trim();
+    if (!league) { alert("נא להזין שם לליגה החדשה"); return; }
+  } else {
+    league = leagueSelectEl.value;
+  }
+
+  let home, away;
+  const homeSelect = document.getElementById('inputHomeSelect');
+  const awaySelect = document.getElementById('inputAwaySelect');
+  home = (isNewLeague || homeSelect.value === FREE_TEAM_VALUE) ? document.getElementById('inputHomeFree').value.trim() : homeSelect.value;
+  away = (isNewLeague || awaySelect.value === FREE_TEAM_VALUE) ? document.getElementById('inputAwayFree').value.trim() : awaySelect.value;
+
+  const time = document.getElementById('inputTime').value.trim() || "20:00";
+  const leagueNote = document.getElementById('inputLeagueNote').value.trim();
+  if (!home || !away) { alert("נא להזין את שתי הקבוצות"); return; }
+
+  addTeamsToPools(league, [home, away]);
+  saveAll();
+
+  let dayObj = scheduleData.find(d => d.day === dayLabel);
+  if (!dayObj) { dayObj = { day: dayLabel, leagues: [] }; scheduleData.push(dayObj); }
+  let leagueObj = dayObj.leagues.find(l => normKey(l.name) === normKey(league));
+  if (!leagueObj) { leagueObj = { name: league, matches: [] }; dayObj.leagues.push(leagueObj); }
+  if (leagueNote) leagueObj.note = leagueNote;
+  leagueObj.matches.push({ home, away, time });
+  saveSchedule();
+
+  document.getElementById('inputHomeFree').value = "";
+  document.getElementById('inputAwayFree').value = "";
+  document.getElementById('inputLeagueNote').value = "";
+
+  refreshLeagueSelects();
+  leagueSelectEl.value = isNewLeague ? NEW_LEAGUE_VALUE : league;
+  onLeagueSelectChange();
+  renderSchedule();
+  showToast("המשחק נוסף בהצלחה!");
+}
+function addTeamsToPools(league, teams) {
+  if (!leaguesData[league]) leaguesData[league] = [];
+  teams.forEach(t => {
+    if (!t) return;
+    if (!leaguesData[league].some(x => normKey(x) === normKey(t))) leaguesData[league].push(t);
+    if (!globalTeamsPool.some(x => normKey(x) === normKey(t))) globalTeamsPool.push(t);
+  });
+}
+function deleteMatch(dayIdx, leagueIdx, matchIdx) {
+  scheduleData[dayIdx].leagues[leagueIdx].matches.splice(matchIdx, 1);
+  if (scheduleData[dayIdx].leagues[leagueIdx].matches.length === 0) scheduleData[dayIdx].leagues.splice(leagueIdx, 1);
+  if (scheduleData[dayIdx].leagues.length === 0) scheduleData.splice(dayIdx, 1);
+  saveSchedule();
+  renderSchedule();
+}
+function deleteDay(dayIdx) {
+  if (!scheduleData[dayIdx]) return;
+  if (!confirm(`למחוק את כל היום "${scheduleData[dayIdx].day}" מהלוח (כולל כל המשחקים בו)?`)) return;
+  scheduleData.splice(dayIdx, 1);
+  saveSchedule();
+  renderSchedule();
+  showToast("היום נמחק בהצלחה!");
+}
+
+// ---------- עריכת משחק בודד ----------
+function openEditMatch(dayIdx, leagueIdx, matchIdx) {
+  const league = scheduleData[dayIdx].leagues[leagueIdx];
+  const match = league.matches[matchIdx];
+  if (!match) return;
+  editingDayIdx = dayIdx; editingLeagueIdx = leagueIdx; editingMatchIdx = matchIdx;
+  document.getElementById('editHomeInput').value = match.home;
+  document.getElementById('editAwayInput').value = match.away;
+  document.getElementById('editNoteInput').value = league.note || "";
+  buildTimeOptions(document.getElementById('editTimeSelect'), match.time);
+  document.getElementById('editMatchModal').classList.add('active');
+}
+function closeEditMatchModal() {
+  document.getElementById('editMatchModal').classList.remove('active');
+  editingDayIdx = editingLeagueIdx = editingMatchIdx = null;
+}
+function saveEditedMatch() {
+  if (editingDayIdx === null) return;
+  const home = document.getElementById('editHomeInput').value.trim();
+  const away = document.getElementById('editAwayInput').value.trim();
+  const time = document.getElementById('editTimeSelect').value;
+  const note = document.getElementById('editNoteInput').value.trim();
+  if (!home || !away) { alert("נא להזין את שתי הקבוצות"); return; }
+  const league = scheduleData[editingDayIdx].leagues[editingLeagueIdx];
+  const old = league.matches[editingMatchIdx] || {};
+  league.matches[editingMatchIdx] = Object.assign({}, old, { home, away, time });
+  if (old.time !== time) delete league.matches[editingMatchIdx].ts;
+  if (note) { league.note = note; } else { delete league.note; }
+  addTeamsToPools(league.name, [home, away]);
+  saveAll();
+  closeEditMatchModal();
+  renderSchedule();
+  refreshMasterDatalist();
+  showToast("המשחק עודכן בהצלחה!");
+}
+
+// =====================================================================
+//  רשת: 365Scores + הנקדן של דיקטה
+// =====================================================================
+let workingProxy;   // undefined = עוד לא נבדק, null = חיבור ישיר עובד, מחרוזת = שרת מתווך שעובד
+async function fetchWithTimeout(url, options, ms) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms || 25000);
+  try { return await fetch(url, Object.assign({}, options || {}, { signal: ctrl.signal })); }
+  finally { clearTimeout(timer); }
+}
+// מושך JSON. באפליקציה — ישירות (בלי חסימות דפדפן). בדפדפן — ישירות, ואם נחסם: דרך שרת מתווך.
+async function fetchJSON(url, options, timeoutMs) {
+  const routes = [];
+  if (isNative() || !settings.useProxy) {
+    routes.push(null);
+  } else {
+    if (workingProxy !== undefined) routes.push(workingProxy);
+    [null, ...(settings.proxies || [])].forEach(r => { if (!routes.includes(r)) routes.push(r); });
+  }
+  let lastErr = null;
+  for (const proxy of routes) {
+    try {
+      const target = proxy ? proxy.replace('{url}', encodeURIComponent(url)) : url;
+      const res = await fetchWithTimeout(target, options, timeoutMs || (proxy ? 30000 : 20000));
+      if (!res.ok) { lastErr = new Error(`HTTP ${res.status}`); continue; }
+      const text = await res.text();
+      const json = JSON.parse(text);
+      workingProxy = proxy;
+      return json;
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error("network");
+}
+function ddmmyyyy(d) { return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; }
+function build365Url(dateObj, compIds) {
+  const p = new URLSearchParams({
+    appTypeId: "5", langId: String(settings.langId || 2), timezoneName: "Asia/Jerusalem",
+    userCountryId: String(settings.userCountryId || 6), sports: "1",
+    startDate: ddmmyyyy(dateObj), endDate: ddmmyyyy(dateObj),
+    showOdds: "false", onlyMajorGames: "false", withTop: "false"
+  });
+  if (compIds && compIds.length) p.set("competitions", compIds.join(","));
+  return "https://webws.365scores.com/web/games/allscores/?" + p.toString();
+}
+// משיכת יום אחד (כולל עמודים נוספים אם יש)
+async function fetch365Day(dateObj, compIds) {
+  let url = build365Url(dateObj, compIds);
+  const out = { games: [], competitions: [], countries: [] };
+  for (let page = 0; page < 8 && url; page++) {
+    const json = await fetchJSON(url);
+    if (!json || typeof json !== 'object') break;
+    (json.games || []).forEach(g => out.games.push(g));
+    (json.competitions || []).forEach(c => out.competitions.push(c));
+    (json.countries || []).forEach(c => out.countries.push(c));
+    const next = json.paging && json.paging.nextPage;
+    url = next ? (String(next).startsWith('http') ? next : "https://webws.365scores.com" + next) : null;
+  }
+  return out;
+}
+async function runPool(items, limit, worker) {
+  let i = 0;
+  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (i < items.length) { const idx = i++; await worker(items[idx], idx); }
+  });
+  await Promise.all(runners);
+}
+function daysBetween(from, to) {
+  const out = [];
+  const d = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+  const end = new Date(to.getFullYear(), to.getMonth(), to.getDate());
+  while (d <= end && out.length < 31) { out.push(new Date(d)); d.setDate(d.getDate() + 1); }
+  return out;
+}
+async function fetch365Range(days, compIds, onProgress) {
+  const games = new Map(), comps = new Map(), countries = new Map();
+  let done = 0, failed = 0, lastErr = null;
+  await runPool(days, 3, async (day) => {
+    try {
+      const r = await fetch365Day(day, compIds);
+      r.games.forEach(g => { if (g && g.id != null) games.set(g.id, g); });
+      r.competitions.forEach(c => { if (c && c.id != null) comps.set(c.id, c); });
+      r.countries.forEach(c => { if (c && c.id != null) countries.set(c.id, c); });
+    } catch (e) { failed++; lastErr = e; }
+    done++;
+    if (onProgress) onProgress(done, days.length);
+  });
+  if (failed === days.length) throw lastErr || new Error("network");
+  return { games: [...games.values()], comps, countries, failed };
+}
+
+// זמן ישראל של משחק
+const JLM_FMT = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Jerusalem', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hourCycle: 'h23', weekday: 'short' });
+function jerusalemParts(date) {
+  const p = {};
+  JLM_FMT.formatToParts(date).forEach(x => { p[x.type] = x.value; });
+  return { y: +p.year, mo: +p.month, d: +p.day, h: (+p.hour) % 24, mi: +p.minute, dow: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(p.weekday) };
+}
+function dayLabelFromParts(p) { return `יום ${HEBREW_DOW[p.dow]}, ${p.d} ב${HEBREW_MONTHS[p.mo - 1]} ${p.y}`; }
+// ב-365: roundName הוא לרוב רק המילה "מחזור" ו-roundNum הוא המספר. בשלבי גביע roundName הוא שם השלב.
+function roundText(g) {
+  const rn = (typeof g.roundName === 'string') ? g.roundName.trim() : "";
+  const num = Number(g.roundNum) > 0 ? Number(g.roundNum) : 0;
+  if (!rn || rn === "מחזור" || !hasHebrew(rn)) return num ? `מחזור ${num}` : "";
+  if (/^(מחזור|סיבוב)$/.test(rn) && num) return `${rn} ${num}`;
+  return rn;
+}
+function normalizeGame(g, comps) {
+  const start = new Date(g.startTime);
+  if (isNaN(start)) return null;
+  const parts = jerusalemParts(start);
+  const comp = comps.get(g.competitionId);
+  const statusText = String(g.statusText || g.shortStatusText || "");
+  const home = (g.homeCompetitor && (g.homeCompetitor.name || g.homeCompetitor.longName)) || "";
+  const away = (g.awayCompetitor && (g.awayCompetitor.name || g.awayCompetitor.longName)) || "";
+  return {
+    id: g.id,
+    compId: g.competitionId,
+    compName: (comp && comp.name) || g.competitionDisplayName || "",
+    ts: start.getTime(),
+    parts,
+    dayLabel: dayLabelFromParts(parts),
+    time: timeLabelHM(parts.h, parts.mi, false),
+    timeNum: numericTime(parts.h, parts.mi),
+    home: String(home).trim(),
+    away: String(away).trim(),
+    statusGroup: g.statusGroup,
+    statusText,
+    postponed: /נדח|בוטל|הופסק|מושהה|postpon|cancel|abandon|suspend/i.test(statusText),
+    started: (g.statusGroup === 3 || g.statusGroup === 4) || start.getTime() < Date.now(),
+    round: roundText(g)
+  };
+}
+
+// ---------- הנקדן של דיקטה (ניקוד אוטומטי לשמות חדשים) ----------
+let dictaDown = false, workingDicta = null;
+function pickDictaOption(o) {
+  if (o == null) return null;
+  if (typeof o === 'string') return o;
+  if (Array.isArray(o)) return pickDictaOption(o[0]);
+  if (typeof o === 'object') return o.w || o.word || o.text || o.str || o.nikud || null;
+  return null;
+}
+function parseDictaResponse(json) {
+  if (typeof json === 'string') return json;
+  let arr = Array.isArray(json) ? json : (json && (json.data || json.result || json.words || json.tokens));
+  if (typeof arr === 'string') return arr;
+  if (!Array.isArray(arr)) return null;
+  return arr.map(tok => {
+    if (typeof tok === 'string') return tok;
+    if (!tok || typeof tok !== 'object') return '';
+    if (tok.sep || tok.separator) return tok.word != null ? tok.word : (tok.str || '');
+    const opts = tok.options || (tok.nakdan && tok.nakdan.options) || tok.nakdanOptions || null;
+    const w = (opts && opts.length) ? pickDictaOption(opts[0]) : null;
+    return String(w || tok.word || tok.str || '');
+  }).join('').replace(/\|/g, '');
+}
+async function dictaNikud(text) {
+  if (!text || dictaDown) return null;
+  const eps = workingDicta ? [workingDicta, ...settings.dictaEndpoints.filter(e => e !== workingDicta)] : settings.dictaEndpoints;
+  for (const ep of eps) {
+    try {
+      const json = await fetchJSON(ep, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify({ task: "nakdan", data: text, genre: "modern", addmorph: true, keepmetagim: true, keepqq: false, nodageshdefmem: false, patachma: false, useTokenization: true })
+      }, 12000);
+      const out = parseDictaResponse(json);
+      if (out && hasNikud(out)) { workingDicta = ep; return out.trim(); }
+    } catch (e) { /* ננסה את הכתובת הבאה */ }
+  }
+  return null;
+}
+function openDictaSite(plain) {
+  copyText(plain).then(() => showToast("השם הועתק — הדבק אותו בנקדן ואז העתק את התוצאה חזרה"));
+  window.open("https://nakdan.dicta.org.il/", "_blank");
+}
+
+// =====================================================================
+//  משיכה אוטומטית — מסך ראשי
+// =====================================================================
+let importState = { games: [], checked: new Set(), review: [] };
+function toDateInputValue(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+function fromDateInputValue(v) { const [y, m, d] = String(v).split('-').map(Number); return (y && m && d) ? new Date(y, m - 1, d) : null; }
+function setImportRange(startOffset, endOffset) {
+  const now = new Date();
+  const a = new Date(now.getFullYear(), now.getMonth(), now.getDate() + startOffset);
+  const b = new Date(now.getFullYear(), now.getMonth(), now.getDate() + endOffset);
+  document.getElementById('impFrom').value = toDateInputValue(a);
+  document.getElementById('impTo').value = toDateInputValue(b);
+}
+function getImportRange() {
+  const a = fromDateInputValue(document.getElementById('impFrom').value);
+  const b = fromDateInputValue(document.getElementById('impTo').value);
+  if (!a || !b) { alert("נא לבחור טווח תאריכים"); return null; }
+  if (b < a) { alert("תאריך הסיום לפני תאריך ההתחלה"); return null; }
+  const days = daysBetween(a, b);
+  if (days.length > 21) { alert("אפשר למשוך עד 21 ימים בכל פעם"); return null; }
+  return days;
+}
+function openImportModal() {
+  if (!document.getElementById('impFrom').value) setImportRange(0, 6);
+  document.getElementById('impReplace').checked = !!settings.replaceOnImport;
+  document.getElementById('impRound').checked = !!settings.addRoundNote;
+  loadAdvancedSettingsUI();
+  renderFavList();
+  document.getElementById('importModal').classList.add('active');
+}
+function closeImportModal() {
+  settings.replaceOnImport = document.getElementById('impReplace').checked;
+  settings.addRoundNote = document.getElementById('impRound').checked;
+  saveSettings();
+  document.getElementById('importModal').classList.remove('active');
+}
+function setImpStatus(msg, cls) {
+  const el = document.getElementById('impStatus');
+  el.textContent = msg || "";
+  el.className = "status-line" + (cls ? " " + cls : "");
+}
+
+// ---------- הליגות המועדפות ----------
+function favById(id) { return settings.favorites.find(f => String(f.id) === String(id)); }
+function favDisplay(f) { return (f.display && f.display.trim()) || f.name || `ליגה ${f.id}`; }
+function renderFavList() {
+  const el = document.getElementById('favList');
+  if (!settings.favorites.length) {
+    el.innerHTML = `<p class="empty-hint">עוד לא בחרת ליגות. לחץ "🔍 בחירת ליגות מתוך 365" — זה נעשה פעם אחת בלבד.</p>`;
+    return;
+  }
+  el.innerHTML = settings.favorites.map((f, i) => {
+    const shown = vocalizeName(favDisplay(f));
+    return `<div class="fav-row">
+      <button class="btn-small" onclick="moveFav(${i}, -1)" ${i === 0 ? 'disabled' : ''} title="למעלה">▲</button>
+      <button class="btn-small" onclick="moveFav(${i}, 1)" ${i === settings.favorites.length - 1 ? 'disabled' : ''} title="למטה">▼</button>
+      <input type="text" value="${esc(f.display || f.name || '')}" onchange="renameFav(${i}, this.value)" title="השם שיופיע ויוקרא">
+      <span class="meta">${esc(shown !== favDisplay(f) ? shown + ' · ' : '')}${esc(f.name || '')}${f.country ? ' · ' + esc(f.country) : ''} · #${esc(f.id)}</span>
+      <button class="btn-small btn-danger" onclick="removeFav(${i})" title="הסר">✖</button>
+    </div>`;
+  }).join("");
+}
+function moveFav(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= settings.favorites.length) return;
+  const arr = settings.favorites;
+  [arr[i], arr[j]] = [arr[j], arr[i]];
+  saveSettings(); renderFavList();
+}
+function renameFav(i, val) {
+  const f = settings.favorites[i];
+  const oldDisplay = favDisplay(f);
+  f.display = String(val || "").trim() || f.name;
+  // שינוי שם גם בלוח הקיים
+  scheduleData.forEach(d => d.leagues.forEach(l => { if (normKey(l.name) === normKey(oldDisplay)) l.name = f.display; }));
+  saveAll(); renderFavList(); renderSchedule();
+}
+function removeFav(i) {
+  if (!confirm(`להסיר את "${favDisplay(settings.favorites[i])}" מהליגות שלך?`)) return;
+  settings.favorites.splice(i, 1);
+  saveSettings(); renderFavList();
+}
+function addFavoriteFromLink() {
+  const input = document.getElementById('favLinkInput');
+  const raw = input.value.trim();
+  if (!raw) return;
+  let id = null;
+  const m1 = raw.match(/[?&]competitions?=(\d+)/i) || raw.match(/league\/[^\s?#]*?-(\d+)(?:[/?#]|$)/i) || raw.match(/-(\d+)(?:[/?#]|$)/) || raw.match(/^(\d+)$/);
+  if (m1) id = Number(m1[1]);
+  if (!id) { alert("לא הצלחתי לזהות מספר ליגה בקישור. פתח את עמוד הליגה באתר 365Scores והעתק את הכתובת המלאה."); return; }
+  if (favById(id)) { showToast("הליגה כבר ברשימה"); input.value = ""; return; }
+  settings.favorites.push({ id, name: "", display: "", country: "" });
+  input.value = "";
+  saveSettings(); renderFavList();
+  showToast("נוספה ליגה. השם יתעדכן במשיכה הראשונה.");
+}
+
+// ---------- סריקת ליגות ובחירה ----------
+let pickerComps = [];
+let pickerChecked = new Set();
+function openLeaguePicker() {
+  pickerChecked = new Set(settings.favorites.map(f => String(f.id)));
+  renderPicker();
+  document.getElementById('pickerModal').classList.add('active');
+  if (!pickerComps.length) scanLeagues();
+}
+function closeLeaguePicker() { document.getElementById('pickerModal').classList.remove('active'); }
+async function scanLeagues() {
+  const days = getImportRange();
+  if (!days) return;
+  const st = document.getElementById('pickerStatus');
+  const btn = document.getElementById('pickerScanBtn');
+  btn.disabled = true;
+  st.className = "status-line";
+  st.textContent = `סורק ${days.length} ימים...`;
+  try {
+    const r = await fetch365Range(days, null, (d, n) => { st.textContent = `סורק... ${d}/${n} ימים`; });
+    const counts = new Map();
+    r.games.forEach(g => counts.set(g.competitionId, (counts.get(g.competitionId) || 0) + 1));
+    pickerComps = [...r.comps.values()].filter(c => counts.has(c.id)).map(c => ({
+      id: c.id, name: c.name || c.shortName || `ליגה ${c.id}`,
+      country: (r.countries.get(c.countryId) || {}).name || "",
+      count: counts.get(c.id) || 0,
+      popularity: c.popularityRank || 0
+    }));
+    // ליגות שהמשחקים שלהן הגיעו בלי פרטי ליגה
+    counts.forEach((n, id) => {
+      if (!pickerComps.some(c => c.id === id)) {
+        const g = r.games.find(x => x.competitionId === id);
+        pickerComps.push({ id, name: (g && g.competitionDisplayName) || `ליגה ${id}`, country: "", count: n, popularity: 0 });
+      }
+    });
+    pickerComps.sort((a, b) => (b.popularity - a.popularity) || (b.count - a.count));
+    st.className = "status-line ok";
+    st.textContent = `נמצאו ${pickerComps.length} ליגות עם ${r.games.length} משחקים.` + (r.failed ? ` (${r.failed} ימים לא נטענו)` : "");
+    renderPicker();
+  } catch (e) {
+    st.className = "status-line err";
+    st.textContent = connectionErrorText(e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+function renderPicker() {
+  const q = normKey(document.getElementById('pickerSearch').value);
+  const list = document.getElementById('pickerList');
+  // ליגות מועדפות שלא הופיעו בסריקה — עדיין מוצגות
+  const all = [...pickerComps];
+  settings.favorites.forEach(f => { if (!all.some(c => String(c.id) === String(f.id))) all.unshift({ id: f.id, name: f.name || favDisplay(f), country: f.country || "", count: 0 }); });
+  const rows = all.filter(c => !q || normKey(c.name).includes(q) || normKey(c.country).includes(q));
+  if (!rows.length) { list.innerHTML = `<p class="empty-hint" style="padding:10px;">${pickerComps.length ? 'אין תוצאות לחיפוש.' : 'לחץ "סרוק ליגות בטווח".'}</p>`; return; }
+  list.innerHTML = rows.slice(0, 400).map(c => `
+    <label class="picker-item">
+      <input type="checkbox" ${pickerChecked.has(String(c.id)) ? 'checked' : ''} onchange="togglePick('${esc(c.id)}', this.checked)">
+      <span>${esc(c.name)}</span>
+      <span class="meta">${esc(c.country)}${c.count ? ' · ' + c.count + ' משחקים' : ''}</span>
+    </label>`).join("");
+}
+function togglePick(id, on) { if (on) pickerChecked.add(String(id)); else pickerChecked.delete(String(id)); }
+function savePicker() {
+  const keep = settings.favorites.filter(f => pickerChecked.has(String(f.id)));
+  pickerChecked.forEach(id => {
+    if (!keep.some(f => String(f.id) === id)) {
+      const c = pickerComps.find(x => String(x.id) === id) || {};
+      keep.push({ id: Number(id), name: c.name || "", display: c.name || "", country: c.country || "" });
+    }
+  });
+  settings.favorites = keep;
+  saveSettings();
+  renderFavList();
+  closeLeaguePicker();
+  showToast(`נשמרו ${keep.length} ליגות`);
+}
+
+// ---------- משיכת המשחקים ----------
+function connectionErrorText(e) {
+  const base = "לא הצלחתי להתחבר ל-365Scores.";
+  if (isNative()) return `${base} בדוק שיש חיבור לאינטרנט ונסה שוב. (${e && e.message ? e.message : e})`;
+  return `${base} בדפדפן לפעמים החיבור נחסם — באפליקציה (APK) זה עובד ישירות. אפשר לנסות שוב או לבדוק בהגדרות המתקדמות. (${e && e.message ? e.message : e})`;
+}
+async function runImportFetch() {
+  if (!settings.favorites.length) { alert("קודם בחר את הליגות שאתה עוקב אחריהן (שלב 2)."); return; }
+  const days = getImportRange();
+  if (!days) return;
+  settings.replaceOnImport = document.getElementById('impReplace').checked;
+  settings.addRoundNote = document.getElementById('impRound').checked;
+  saveSettings();
+  const btn = document.getElementById('impFetchBtn');
+  btn.disabled = true;
+  document.getElementById('impResults').innerHTML = "";
+  document.getElementById('impReview').innerHTML = "";
+  document.getElementById('impApplyBar').classList.add('hidden');
+  setImpStatus(`מושך משחקים ל-${days.length} ימים...`);
+  const ids = settings.favorites.map(f => Number(f.id));
+  try {
+    const r = await fetch365Range(days, ids, (d, n) => setImpStatus(`מושך... ${d}/${n} ימים`));
+    // עדכון שם ומדינה של הליגות המועדפות
+    settings.favorites.forEach(f => {
+      const c = r.comps.get(Number(f.id));
+      if (c) {
+        if (!f.name) f.name = c.name || "";
+        if (!f.display) f.display = c.name || "";
+        if (!f.country) f.country = (r.countries.get(c.countryId) || {}).name || "";
+      }
+    });
+    saveSettings();
+    renderFavList();
+    const idSet = new Set(ids.map(String));
+    const games = r.games.filter(g => idSet.has(String(g.competitionId))).map(g => normalizeGame(g, r.comps)).filter(Boolean);
+    games.sort((a, b) => a.ts - b.ts);
+    games.forEach((g, i) => { g._i = i; });
+    importState.games = games;
+    importState.checked = new Set(games.filter(g => !g.started && !g.postponed).map(g => g.id));
+    if (!games.length) {
+      setImpStatus("לא נמצאו משחקים של הליגות שלך בטווח הזה." + (r.failed ? ` (${r.failed} ימים לא נטענו)` : ""), "err");
+      btn.disabled = false;
+      return;
+    }
+    setImpStatus(`נמצאו ${games.length} משחקים. סמן מה נכנס להקראה ולחץ "הוסף ללוח".` + (r.failed ? `\n⚠️ ${r.failed} ימים לא נטענו — כדאי לנסות שוב.` : ""), "ok");
+    buildReviewList();
+    renderImportResults();
+    autoNikudReview();
+  } catch (e) {
+    setImpStatus(connectionErrorText(e), "err");
+  } finally {
+    btn.disabled = false;
+  }
+}
+function leagueNameForGame(g) {
+  const f = favById(g.compId);
+  return f ? favDisplay(f) : (g.compName || "");
+}
+// שמות שעוד אין להם ניקוד במילון
+function buildReviewList() {
+  const seen = new Map();
+  const consider = (name, kind) => {
+    if (!name || !hasHebrew(name) || hasNikud(name) || dictGet(name)) return;
+    const k = normKey(name);
+    if (!seen.has(k)) seen.set(k, { plain: name, kind, value: "", status: "wait", edited: false });
+  };
+  importState.games.forEach(g => { consider(leagueNameForGame(g), "ליגה"); consider(g.home, "קבוצה"); consider(g.away, "קבוצה"); });
+  importState.review = [...seen.values()];
+  renderReview();
+}
+function renderReview() {
+  const el = document.getElementById('impReview');
+  const list = importState.review;
+  if (!list.length) { el.innerHTML = ""; return; }
+  const statusIcon = { wait: "⏳", working: "⏳", auto: "🪄", fail: "⚠️", ok: "✅" };
+  el.innerHTML = `<div class="review-box">
+    <h4>🆕 ${list.length} שמות חדשים שעוד לא במילון — בדוק את הניקוד (נשמר לתמיד)</h4>
+    <p class="empty-hint" style="margin:0 0 6px;">ניסיתי לנקד אוטומטית. אם משהו לא מדויק — תקן בתיבה. 🔊 = לשמוע איך זה יוקרא.</p>
+    ${list.map((r, i) => `<div class="review-row">
+      <span class="plain">${statusIcon[r.status] || ""} ${esc(r.plain)} <span class="badge-info">${esc(r.kind)}</span></span>
+      <input type="text" id="rv_${i}" value="${esc(r.value)}" placeholder="${esc(r.plain)}" oninput="onReviewInput(${i}, this.value)">
+      <span class="acts">
+        <button onclick="speakText(document.getElementById('rv_${i}').value || importState.review[${i}].plain)" title="השמע">🔊</button>
+        <button onclick="retryReviewNikud(${i})" title="נקד שוב אוטומטית">🪄</button>
+        <button onclick="openDictaSite(importState.review[${i}].plain)" title="פתח את הנקדן של דיקטה">📋</button>
+      </span>
+    </div>`).join("")}
+  </div>`;
+}
+function onReviewInput(i, val) { const r = importState.review[i]; if (!r) return; r.value = val; r.edited = true; r.status = "ok"; }
+async function retryReviewNikud(i) {
+  const r = importState.review[i];
+  if (!r) return;
+  dictaDown = false;
+  r.status = "working"; renderReview();
+  const v = await dictaNikud(r.plain);
+  if (v) { r.value = v; r.status = "auto"; r.edited = false; } else { r.status = "fail"; showToast("הניקוד האוטומטי לא זמין כרגע — אפשר להקליד ידנית או דרך 📋"); }
+  renderReview(); renderImportResults();
+}
+async function autoNikudReview() {
+  const list = importState.review.filter(r => !r.value);
+  if (!list.length) return;
+  let firstFailed = 0;
+  await runPool(list, 3, async (r) => {
+    if (dictaDown || r.edited) { if (!r.edited) r.status = "fail"; return; }
+    r.status = "working";
+    const v = await dictaNikud(r.plain);
+    if (v && !r.edited) { r.value = v; r.status = "auto"; }
+    else if (!r.edited) { r.status = "fail"; if (!workingDicta && ++firstFailed >= 2) dictaDown = true; }
+    const idx = importState.review.indexOf(r);
+    const inp = document.getElementById('rv_' + idx);
+    if (inp && !r.edited) inp.value = r.value;
+  });
+  renderReview();
+  renderImportResults();
+  if (dictaDown) setImpStatus(document.getElementById('impStatus').textContent + "\nℹ️ הניקוד האוטומטי לא זמין כרגע — אפשר להקליד ניקוד בתיבות, או ללחוץ 📋 לנקדן של דיקטה.", "ok");
+}
+function previewName(name) {
+  const r = importState.review.find(x => normKey(x.plain) === normKey(name));
+  if (r && r.value) return r.value;
+  return vocalizeName(name);
+}
+function renderImportResults() {
+  const el = document.getElementById('impResults');
+  const games = importState.games;
+  if (!games.length) { el.innerHTML = ""; return; }
+  const favOrder = new Map(settings.favorites.map((f, i) => [String(f.id), i]));
+  const byDay = new Map();
+  games.forEach(g => { if (!byDay.has(g.dayLabel)) byDay.set(g.dayLabel, []); byDay.get(g.dayLabel).push(g); });
+  let html = "";
+  byDay.forEach((list, dayLabel) => {
+    const byLeague = new Map();
+    list.forEach(g => { const k = String(g.compId); if (!byLeague.has(k)) byLeague.set(k, []); byLeague.get(k).push(g); });
+    const leagueKeys = [...byLeague.keys()].sort((a, b) => (favOrder.get(a) ?? 999) - (favOrder.get(b) ?? 999));
+    const dayIds = list.map(g => g.id);
+    const allOn = dayIds.every(id => importState.checked.has(id));
+    html += `<div class="imp-day">
+      <div class="imp-day-head"><span>📅 ${esc(dayLabel)}</span>
+        <label class="check" style="margin:0; font-weight:normal; color:var(--text-main);"><input type="checkbox" ${allOn ? 'checked' : ''} onchange="setDayChecks(${list[0]._i}, this.checked)"> כל היום</label></div>`;
+    leagueKeys.forEach(k => {
+      const lg = byLeague.get(k);
+      const lname = previewName(leagueNameForGame(lg[0]));
+      html += `<div class="imp-league"><div class="imp-league-name">🏆 ${esc(lname)}${settings.addRoundNote && lg[0].round ? ` <span class="badge-info">${esc(lg[0].round)}</span>` : ''}</div>`;
+      lg.forEach(g => {
+        const warn = g.postponed ? `<span class="badge-warn">${esc(g.statusText || 'נדחה')}</span>` : (g.started ? `<span class="badge-warn">כבר התחיל/הסתיים</span>` : '');
+        html += `<label class="imp-match ${g.postponed || g.started ? 'dim' : ''}">
+          <input type="checkbox" ${importState.checked.has(g.id) ? 'checked' : ''} onchange="toggleImportGame(${g._i}, this.checked)">
+          <span class="t">${esc(g.timeNum)}</span>
+          <span>${esc(previewName(g.home))}</span><span style="color:var(--text-muted);">נגד</span><span>${esc(previewName(g.away))}</span>
+          ${warn}
+        </label>`;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+  el.innerHTML = html;
+  updateApplyBar();
+}
+function toggleImportGame(idx, on) { const g = importState.games[idx]; if (!g) return; if (on) importState.checked.add(g.id); else importState.checked.delete(g.id); updateApplyBar(); }
+function setDayChecks(idx, on) {
+  const dayLabel = importState.games[idx] && importState.games[idx].dayLabel;
+  importState.games.filter(g => g.dayLabel === dayLabel).forEach(g => { if (on) importState.checked.add(g.id); else importState.checked.delete(g.id); });
+  renderImportResults();
+}
+function setAllImportChecks(on) {
+  importState.checked = new Set(on ? importState.games.map(g => g.id) : []);
+  renderImportResults();
+}
+function updateApplyBar() {
+  const bar = document.getElementById('impApplyBar');
+  const n = importState.checked.size;
+  bar.classList.toggle('hidden', !importState.games.length);
+  const btn = document.getElementById('impApplyBtn');
+  btn.textContent = `➕ הוסף ${n} משחקים ללוח`;
+  btn.disabled = n === 0;
+}
+function sortSchedule() {
+  const favOrder = settings.favorites.map(f => normKey(favDisplay(f)));
+  scheduleData.sort((a, b) => {
+    const da = parseDayLabelToDate(a.day), db = parseDayLabelToDate(b.day);
+    if (da && db) return da - db;
+    return 0;
+  });
+  scheduleData.forEach(d => {
+    d.leagues.sort((a, b) => {
+      const ia = favOrder.indexOf(normKey(a.name)), ib = favOrder.indexOf(normKey(b.name));
+      return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
+    });
+    d.leagues.forEach(l => l.matches.sort((x, y) => {
+      const tx = x.ts || 0, ty = y.ts || 0;
+      if (tx && ty) return tx - ty;
+      return (TIME_SORT_MAP.get(x.time) ?? 0) - (TIME_SORT_MAP.get(y.time) ?? 0);
+    }));
+  });
+}
+function applyImport() {
+  const selected = importState.games.filter(g => importState.checked.has(g.id));
+  if (!selected.length) return;
+  // שמירת הניקוד של השמות החדשים במילון
+  importState.review.forEach(r => {
+    const v = (r.value || "").trim();
+    if (v && hasNikud(v)) dictSet(r.plain, v, !r.edited && r.status === "auto");
+  });
+  // גיבוי לביטול
+  try { localStorage.setItem('scheduleUndo', JSON.stringify(scheduleData)); } catch (e) {}
+  const replace = document.getElementById('impReplace').checked;
+  const addRound = document.getElementById('impRound').checked;
+  if (replace) scheduleData = [];
+  let added = 0, skipped = 0;
+  selected.forEach(g => {
+    const leagueName = leagueNameForGame(g);
+    const home = vocalizeName(g.home), away = vocalizeName(g.away);
+    let dayObj = scheduleData.find(d => d.day === g.dayLabel);
+    if (!dayObj) { dayObj = { day: g.dayLabel, leagues: [] }; scheduleData.push(dayObj); }
+    let leagueObj = dayObj.leagues.find(l => normKey(l.name) === normKey(leagueName));
+    if (!leagueObj) { leagueObj = { name: leagueName, matches: [] }; dayObj.leagues.push(leagueObj); }
+    if (leagueObj.matches.some(m => m.gameId === g.id || (normKey(m.home) === normKey(home) && normKey(m.away) === normKey(away)))) { skipped++; return; }
+    if (addRound && g.round && !leagueObj.note) leagueObj.note = g.round;
+    leagueObj.matches.push({ home, away, time: g.time, gameId: g.id, ts: g.ts });
+    addTeamsToPools(leagueName, [home, away]);
+    added++;
+  });
+  sortSchedule();
+  saveAll();
+  refreshLeagueSelects();
+  renderSchedule();
+  document.getElementById('undoImportBtn').classList.remove('hidden');
+  closeImportModal();
+  showToast(`נוספו ${added} משחקים ללוח` + (skipped ? ` (${skipped} כבר היו)` : ""), 3500);
+  setTimeout(() => document.getElementById('outputArea').scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+}
+function undoLastImport() {
+  const prev = loadJSON('scheduleUndo');
+  if (!prev) { showToast("אין מה לבטל"); return; }
+  if (!confirm("להחזיר את הלוח למצב שהיה לפני המשיכה האחרונה?")) return;
+  scheduleData = prev;
+  try { localStorage.removeItem('scheduleUndo'); } catch (e) {}
+  saveSchedule(); renderSchedule();
+  document.getElementById('undoImportBtn').classList.add('hidden');
+  showToast("הלוח הוחזר");
+}
+
+// ---------- הגדרות מתקדמות ובדיקת חיבור ----------
+function loadAdvancedSettingsUI() {
+  document.getElementById('setUseProxy').checked = !!settings.useProxy;
+  document.getElementById('setProxies').value = (settings.proxies || []).join("\n");
+  document.getElementById('setDicta').value = (settings.dictaEndpoints || []).join("\n");
+  document.getElementById('setCountry').value = settings.userCountryId;
+  document.getElementById('setLang').value = settings.langId;
+}
+function saveAdvancedSettings() {
+  settings.useProxy = document.getElementById('setUseProxy').checked;
+  settings.proxies = document.getElementById('setProxies').value.split(/\n+/).map(s => s.trim()).filter(Boolean);
+  settings.dictaEndpoints = document.getElementById('setDicta').value.split(/\n+/).map(s => s.trim()).filter(Boolean);
+  settings.userCountryId = Number(document.getElementById('setCountry').value) || 6;
+  settings.langId = Number(document.getElementById('setLang').value) || 2;
+  workingProxy = undefined; workingDicta = null; dictaDown = false;
+  saveSettings();
+}
+function resetAdvancedSettings() {
+  Object.assign(settings, { useProxy: true, proxies: DEFAULT_PROXIES.slice(), dictaEndpoints: DEFAULT_DICTA.slice(), userCountryId: 6, langId: 2 });
+  workingProxy = undefined; workingDicta = null; dictaDown = false;
+  saveSettings(); loadAdvancedSettingsUI();
+  showToast("ההגדרות הוחזרו לברירת מחדל");
+}
+async function testConnections() {
+  const el = document.getElementById('connTest');
+  el.className = "status-line";
+  el.textContent = "בודק...";
+  const lines = [];
+  try {
+    const r = await fetch365Day(new Date(), null);
+    lines.push(`✅ 365Scores: התקבלו ${r.games.length} משחקים להיום${workingProxy ? ' (דרך שרת מתווך)' : ''}.`);
+  } catch (e) { lines.push(`❌ 365Scores: ${e && e.message ? e.message : e}`); }
+  dictaDown = false;
+  const v = await dictaNikud("ברצלונה נגד ריאל מדריד");
+  lines.push(v ? `✅ נקדן דיקטה: ${v}` : "❌ נקדן דיקטה: לא זמין כרגע (אפשר לנקד ידנית / דרך האתר שלהם).");
+  lines.push(isNative() ? "📱 מצב אפליקציה" : "🌐 מצב דפדפן");
+  el.textContent = lines.join("\n");
+}
+
+// =====================================================================
+//  מילון ניקוד — מסך עריכה
+// =====================================================================
+let dictView = [], dictMissingList = [];
+function openDictModal() {
+  renderDictMissing();
+  renderDictList();
+  document.getElementById('dictModal').classList.add('active');
+}
+function closeDictModal() {
+  document.getElementById('dictModal').classList.remove('active');
+  saveDict();
+  renderSchedule();
+  renderFavList();
+}
+function renderDictMissing() {
+  dictMissingList = collectMissingNikud();
+  const el = document.getElementById('dictMissing');
+  if (!dictMissingList.length) { el.innerHTML = ""; return; }
+  el.innerHTML = `<div class="review-box" style="margin-top:0;">
+    <h4>⚠️ שמות בלוח שעוד אין להם ניקוד (${dictMissingList.length})</h4>
+    ${dictMissingList.map((n, i) => `<div class="review-row">
+      <span class="plain">${esc(n)}</span>
+      <input type="text" id="dm_${i}" placeholder="הקלד את השם המנוקד">
+      <span class="acts">
+        <button onclick="dictMissingAuto(${i})" title="נקד אוטומטית">🪄</button>
+        <button onclick="openDictaSite(dictMissingList[${i}])" title="פתח את הנקדן של דיקטה">📋</button>
+        <button class="btn-primary" onclick="dictMissingSave(${i})" title="שמור">✓</button>
+      </span></div>`).join("")}
+    <button class="btn-primary btn-small" style="margin-top:8px;" onclick="dictMissingSaveAll()">✓ שמור את כולם</button>
+  </div>`;
+}
+async function dictMissingAuto(i) {
+  dictaDown = false;
+  const inp = document.getElementById('dm_' + i);
+  inp.placeholder = "מנקד...";
+  const v = await dictaNikud(dictMissingList[i]);
+  if (v) inp.value = v; else { inp.placeholder = "הקלד את השם המנוקד"; showToast("הניקוד האוטומטי לא זמין כרגע"); }
+}
+function dictMissingSave(i, silent) {
+  const v = document.getElementById('dm_' + i).value.trim();
+  if (!v) return false;
+  dictSet(dictMissingList[i], v, false);
+  saveDict();
+  if (!silent) { renderDictMissing(); renderDictList(); updateOutputText(); renderSchedule(); showToast("נשמר במילון"); }
+  return true;
+}
+function dictMissingSaveAll() {
+  let n = 0;
+  dictMissingList.forEach((_, i) => { if (dictMissingSave(i, true)) n++; });
+  renderDictMissing(); renderDictList(); renderSchedule();
+  showToast(`נשמרו ${n} שמות`);
+}
+function renderDictList() {
+  const q = normKey(document.getElementById('dictSearch').value);
+  const onlyAuto = document.getElementById('dictOnlyAuto').checked;
+  dictView = Object.entries(nikudDict)
+    .filter(([k, e]) => (!onlyAuto || e.auto) && (!q || k.includes(q)))
+    .sort((a, b) => ((b[1].auto ? 1 : 0) - (a[1].auto ? 1 : 0)) || a[0].localeCompare(b[0], 'he'));
+  document.getElementById('dictCount').textContent = `(${Object.keys(nikudDict).length})`;
+  const el = document.getElementById('dictList');
+  if (!dictView.length) { el.innerHTML = `<p class="empty-hint">אין שמות להצגה.</p>`; return; }
+  el.innerHTML = dictView.slice(0, 300).map(([k, e], i) => `<div class="dict-row">
+    <span class="k">${e.auto ? '🪄 ' : ''}${esc(k)}</span>
+    <input type="text" value="${esc(e.v)}" onchange="dictEdit(${i}, this.value)">
+    <span class="acts">
+      <button onclick="speakText(dictView[${i}][1].v)" title="השמע">🔊</button>
+      ${e.auto ? `<button onclick="dictApprove(${i})" title="אשר">✓</button>` : ''}
+      <button class="btn-danger" onclick="dictDelete(${i})" title="מחק">✖</button>
+    </span></div>`).join("") + (dictView.length > 300 ? `<p class="empty-hint">מוצגים 300 ראשונים — השתמש בחיפוש.</p>` : "");
+}
+function dictEdit(i, val) {
+  const [k] = dictView[i];
+  const v = String(val || "").trim();
+  if (!v) return;
+  nikudDict[k] = { v };
+  saveDict(); renderDictList(); updateOutputText();
+}
+function dictApprove(i) { const [k, e] = dictView[i]; nikudDict[k] = { v: e.v }; saveDict(); renderDictList(); }
+function dictDelete(i) {
+  const [k] = dictView[i];
+  if (!confirm(`למחוק את "${k}" מהמילון?`)) return;
+  delete nikudDict[k];
+  saveDict(); renderDictList(); renderDictMissing(); updateOutputText();
+}
+function dictAddNew() {
+  const p = document.getElementById('dictNewPlain'), v = document.getElementById('dictNewVocal');
+  const plain = p.value.trim(), vocal = v.value.trim();
+  if (!plain && !vocal) return;
+  dictSet(plain || vocal, vocal || plain, false);
+  p.value = ""; v.value = "";
+  saveDict(); renderDictList(); renderDictMissing(); updateOutputText();
+  showToast("נוסף למילון");
+}
+
+// =====================================================================
+//  מודאל ניהול, מאגר, גיבוי ושחזור (כמו בגרסה הקודמת)
+// =====================================================================
+function openManageModal() {
+  document.getElementById('manageModal').classList.add('active');
+  renderManageLeagueSelect();
+  renderMasterPoolTeams();
+  onManageLeagueChange();
+}
+function closeManageModal() {
+  document.getElementById('manageModal').classList.remove('active');
+  saveAll();
+  refreshLeagueSelects();
+}
+function renderMasterPoolTeams() {
+  const chipsContainer = document.getElementById('managePoolTeamChips');
+  chipsContainer.innerHTML = "";
+  if (!globalTeamsPool || globalTeamsPool.length === 0) {
+    chipsContainer.innerHTML = '<span class="empty-hint">המאגר הכללי ריק כרגע. טען מאגר מאקסל או הוסף ידנית.</span>';
+    return;
+  }
+  globalTeamsPool.forEach((team, idx) => {
+    const chip = document.createElement('div');
+    chip.className = "team-chip";
+    chip.innerHTML = `<span>${esc(team)}</span>`;
+    const editBtn = document.createElement('button');
+    editBtn.textContent = "✏️";
+    editBtn.style.background = "var(--accent-blue)";
+    editBtn.onclick = () => manageEditPoolTeam(idx);
+    chip.appendChild(editBtn);
+    const delBtn = document.createElement('button');
+    delBtn.textContent = "✖";
+    delBtn.onclick = () => { globalTeamsPool.splice(idx, 1); saveGlobalPool(); renderMasterPoolTeams(); refreshMasterDatalist(); };
+    chip.appendChild(delBtn);
+    chipsContainer.appendChild(chip);
+  });
+}
+function manageEditPoolTeam(idx) {
+  const oldName = globalTeamsPool[idx];
+  const newName = prompt("שם חדש לקבוצה במאגר:", oldName);
+  if (newName === null) return;
+  const trimmed = newName.trim();
+  if (!trimmed) return;
+  globalTeamsPool[idx] = trimmed;
+  if (hasNikud(trimmed)) { dictSet(trimmed, trimmed, false); saveDict(); }
+  saveGlobalPool(); renderMasterPoolTeams(); refreshMasterDatalist();
+}
+function manageAddPoolTeam() {
+  const input = document.getElementById('manageNewPoolTeamInput');
+  const team = input.value.trim();
+  if (!team) return;
+  if (!globalTeamsPool.includes(team)) {
+    globalTeamsPool.push(team);
+    if (hasNikud(team) && !dictGet(team)) { dictSet(team, team, false); saveDict(); }
+    saveGlobalPool(); renderMasterPoolTeams(); refreshMasterDatalist();
+  }
+  input.value = "";
+}
+function manageClearPool() {
+  if (!confirm("האם אתה בטוח שברצונך למחוק את כל מאגר הקבוצות הכללי?")) return;
+  globalTeamsPool = [];
+  saveGlobalPool(); renderMasterPoolTeams(); refreshMasterDatalist();
+}
+function readExcelFirstColumn(file, cb) {
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+      cb(rows.map(row => (row[0] !== undefined && row[0] !== null) ? String(row[0]).trim() : "").filter(Boolean));
+    } catch (err) {
+      alert("שגיאה בקריאת קובץ האקסל. ודא שהקובץ תקין ושרשימת הקבוצות נמצאת בעמודה A.");
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+function manageImportPoolExcel() {
+  const fileInput = document.getElementById('managePoolExcelInput');
+  const file = fileInput.files[0];
+  if (!file) { alert("נא לבחור קובץ אקסל"); return; }
+  if (typeof XLSX === "undefined") { alert("ספריית האקסל לא נטענה — בדוק חיבור לאינטרנט."); return; }
+  readExcelFirstColumn(file, (names) => {
+    let addedCount = 0;
+    names.forEach(teamName => {
+      if (!globalTeamsPool.includes(teamName)) { globalTeamsPool.push(teamName); addedCount++; }
+      if (hasNikud(teamName) && !dictGet(teamName)) dictSet(teamName, teamName, false);
+    });
+    fileInput.value = "";
+    saveGlobalPool(); saveDict(); renderMasterPoolTeams(); refreshMasterDatalist();
+    alert(`נוספו ${addedCount} קבוצות למאגר הכללי בהצלחה!`);
+  });
+}
+async function workbookToFile(wb, filename) {
+  const arr = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  await saveFile(filename, new Blob([arr], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+}
+function exportPoolToExcel() {
+  if (!globalTeamsPool || globalTeamsPool.length === 0) { alert("המאגר הכללי ריק, אין מה לייצא."); return; }
+  if (typeof XLSX === "undefined") { alert("ספריית האקסל לא נטענה — בדוק חיבור לאינטרנט."); return; }
+  const ws = XLSX.utils.aoa_to_sheet([["שם קבוצה"], ...globalTeamsPool.map(t => [t])]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "מאגר קבוצות");
+  workbookToFile(wb, "מאגר_קבוצות_כללי.xlsx");
+}
+function renderManageLeagueSelect() {
+  const sel = document.getElementById('manageLeagueSelect');
+  const current = sel.value;
+  sel.innerHTML = "";
+  Object.keys(leaguesData).forEach(leagueName => {
+    const opt = document.createElement('option');
+    opt.value = leagueName;
+    opt.textContent = leagueName;
+    sel.appendChild(opt);
+  });
+  if (current && leaguesData[current]) sel.value = current;
+  onManageLeagueChange();
+}
+function onManageLeagueChange() {
+  const sel = document.getElementById('manageLeagueSelect');
+  document.getElementById('manageRenameLeagueInput').value = sel.value || "";
+  renderManageTeams();
+}
+function manageAddLeague() {
+  const input = document.getElementById('manageNewLeagueName');
+  const name = input.value.trim();
+  if (!name) { alert("נא להזין שם ליגה"); return; }
+  if (!leaguesData[name]) leaguesData[name] = [];
+  input.value = "";
+  saveLeagues();
+  renderManageLeagueSelect();
+  document.getElementById('manageLeagueSelect').value = name;
+  onManageLeagueChange();
+}
+function manageRenameLeague() {
+  const sel = document.getElementById('manageLeagueSelect');
+  const oldName = sel.value;
+  const newName = document.getElementById('manageRenameLeagueInput').value.trim();
+  if (!oldName || !leaguesData[oldName]) { alert("נא לבחור ליגה קיימת קודם"); return; }
+  if (!newName) { alert("נא להזין שם חדש"); return; }
+  if (newName === oldName) return;
+  if (leaguesData[newName]) { alert("כבר קיימת ליגה בשם הזה"); return; }
+  leaguesData[newName] = leaguesData[oldName];
+  delete leaguesData[oldName];
+  scheduleData.forEach(dayGroup => dayGroup.leagues.forEach(l => { if (l.name === oldName) l.name = newName; }));
+  settings.favorites.forEach(f => { if (normKey(favDisplay(f)) === normKey(oldName)) f.display = newName; });
+  saveAll();
+  renderManageLeagueSelect();
+  document.getElementById('manageLeagueSelect').value = newName;
+  onManageLeagueChange();
+  renderSchedule();
+}
+function manageDeleteLeague() {
+  const sel = document.getElementById('manageLeagueSelect');
+  const league = sel.value;
+  if (!league) return;
+  if (!confirm(`למחוק את הליגה "${league}" וכל רשימת הקבוצות שלה?`)) return;
+  delete leaguesData[league];
+  saveLeagues();
+  renderManageLeagueSelect();
+}
+function exportCurrentLeagueToExcel() {
+  const league = document.getElementById('manageLeagueSelect').value;
+  if (!league || !leaguesData[league] || leaguesData[league].length === 0) { alert("אין קבוצות בליגה זו לייצוא."); return; }
+  if (typeof XLSX === "undefined") { alert("ספריית האקסל לא נטענה — בדוק חיבור לאינטרנט."); return; }
+  const ws = XLSX.utils.aoa_to_sheet([["שם קבוצה"], ...leaguesData[league].map(t => [t])]);
+  const wb = XLSX.utils.book_new();
+  const safeSheetName = league.replace(/[\\/?*\[\]:]/g, "").slice(0, 31) || "ליגה";
+  XLSX.utils.book_append_sheet(wb, ws, safeSheetName);
+  workbookToFile(wb, `${league.replace(/[\\/:*?"<>|]/g, "")}_רשימת_קבוצות.xlsx`);
+}
+function manageImportExcel() {
+  const league = document.getElementById('manageLeagueSelect').value;
+  if (!league) { alert("נא לבחור או להוסיף ליגה קודם"); return; }
+  const fileInput = document.getElementById('manageExcelInput');
+  const file = fileInput.files[0];
+  if (!file) { alert("נא לבחור קובץ אקסל"); return; }
+  if (typeof XLSX === "undefined") { alert("ספריית האקסל לא נטענה — בדוק חיבור לאינטרנט."); return; }
+  readExcelFirstColumn(file, (names) => {
+    let addedCount = 0;
+    names.forEach(teamName => {
+      if (!leaguesData[league].includes(teamName)) {
+        leaguesData[league].push(teamName);
+        if (!globalTeamsPool.includes(teamName)) globalTeamsPool.push(teamName);
+        addedCount++;
+      }
+      if (hasNikud(teamName) && !dictGet(teamName)) dictSet(teamName, teamName, false);
+    });
+    fileInput.value = "";
+    saveAll(); renderManageTeams(); refreshMasterDatalist();
+    alert(`נוספו ${addedCount} קבוצות חדשות לליגה ${league}.`);
+  });
+}
+function renderManageTeams() {
+  const league = document.getElementById('manageLeagueSelect').value;
+  const chipsContainer = document.getElementById('manageTeamChips');
+  const emptyHint = document.getElementById('manageEmptyHint');
+  chipsContainer.innerHTML = "";
+  if (!league || !leaguesData[league]) { emptyHint.style.display = "block"; return; }
+  const teams = leaguesData[league];
+  emptyHint.style.display = teams.length === 0 ? "block" : "none";
+  teams.forEach((team, idx) => {
+    const chip = document.createElement('div');
+    chip.className = "team-chip";
+    chip.innerHTML = `<span>${esc(team)}</span>`;
+    const editBtn = document.createElement('button');
+    editBtn.textContent = "✏️";
+    editBtn.style.background = "var(--accent-blue)";
+    editBtn.onclick = () => manageEditTeam(league, idx);
+    chip.appendChild(editBtn);
+    const delBtn = document.createElement('button');
+    delBtn.textContent = "✖";
+    delBtn.onclick = () => { leaguesData[league].splice(idx, 1); saveLeagues(); renderManageTeams(); };
+    chip.appendChild(delBtn);
+    chipsContainer.appendChild(chip);
+  });
+}
+function manageEditTeam(league, idx) {
+  const oldName = leaguesData[league][idx];
+  const newName = prompt("שם חדש לקבוצה:", oldName);
+  if (newName === null) return;
+  const trimmed = newName.trim();
+  if (!trimmed) return;
+  leaguesData[league][idx] = trimmed;
+  // אם זה אותו שם עם ניקוד אחר — מעדכנים גם את המילון
+  if (hasNikud(trimmed) && normKey(trimmed) === normKey(oldName)) dictSet(trimmed, trimmed, false);
+  scheduleData.forEach(dayGroup => dayGroup.leagues.forEach(l => {
+    if (l.name !== league) return;
+    l.matches.forEach(m => { if (m.home === oldName) m.home = trimmed; if (m.away === oldName) m.away = trimmed; });
+  }));
+  saveAll(); renderManageTeams(); renderSchedule();
+}
+function manageAddTeam() {
+  const league = document.getElementById('manageLeagueSelect').value;
+  if (!league) { alert("נא לבחור או להוסיף ליגה קודם"); return; }
+  const input = document.getElementById('manageNewTeamName');
+  const team = input.value.trim();
+  if (!team) return;
+  if (!leaguesData[league].includes(team)) {
+    leaguesData[league].push(team);
+    if (!globalTeamsPool.includes(team)) globalTeamsPool.push(team);
+    if (hasNikud(team) && !dictGet(team)) dictSet(team, team, false);
+    saveAll();
+  }
+  input.value = "";
+  renderManageTeams(); refreshMasterDatalist();
+}
+
+// ---------- גיבוי ושחזור נתונים מלא (JSON) ----------
+function exportFullBackup() {
+  const backupData = { version: 2, appVersion: APP_VERSION, exportDate: new Date().toISOString(), leaguesData, scheduleData, globalTeamsPool, nikudDict, settings };
+  const filename = `גיבוי_לוח_משחקים_${new Date().toLocaleDateString('he-IL').replace(/[./]/g, '-')}.json`;
+  saveFile(filename, new Blob([JSON.stringify(backupData, null, 2)], { type: "application/json;charset=utf-8" }))
+    .then(ok => { if (ok !== false) showToast("קובץ הגיבוי מוכן!"); });
+}
+function importFullBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!confirm("שים לב! טעינת הגיבוי תחליף לחלוטין את כל הנתונים הקיימים במערכת. להמשיך?")) { event.target.value = ""; return; }
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.leaguesData && data.scheduleData) {
+        leaguesData = data.leaguesData;
+        scheduleData = data.scheduleData;
+        globalTeamsPool = data.globalTeamsPool || [];
+        if (data.nikudDict && typeof data.nikudDict === 'object') nikudDict = data.nikudDict;
+        if (data.settings && typeof data.settings === 'object') {
+          settings = Object.assign({}, DEFAULT_SETTINGS, data.settings);
+          if (!Array.isArray(settings.favorites)) settings.favorites = [];
+        }
+        seedDictionary();
+        saveAll();
+        document.getElementById('nikudToggle').checked = !!settings.nikudOutput;
+        refreshLeagueSelects();
+        renderSchedule();
+        renderManageLeagueSelect();
+        renderMasterPoolTeams();
+        showToast("כל הנתונים שוחזרו בהצלחה מהגיבוי!");
+      } else {
+        alert("מבנה קובץ הגיבוי אינו תקין.");
+      }
+    } catch (err) {
+      alert("שגיאה בטעינת קובץ הגיבוי: " + err.message);
+    }
+    event.target.value = "";
+  };
+  reader.readAsText(file, "UTF-8");
+}
+
+// ---------- הורדת הטקסט המלא כקובץ ----------
+function parseDayLabelToDate(label) {
+  const m = String(label || "").match(/,\s*(\d{1,2})\s+ב(\S+)\s+(\d{4})/);
+  if (!m) return null;
+  const monthIdx = HEBREW_MONTHS.indexOf(m[2]);
+  if (monthIdx === -1) return null;
+  return new Date(parseInt(m[3], 10), monthIdx, parseInt(m[1], 10));
+}
+function formatDateDDMMYYYY(date) {
+  return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+}
+function downloadOutputText() {
+  const text = generateFullText();
+  if (!text) { alert("אין נתונים להורדה"); return; }
+  const parsedDates = scheduleData.map(d => parseDayLabelToDate(d.day)).filter(Boolean);
+  let filename = "לוח משחקים";
+  if (parsedDates.length > 0) {
+    const minDate = new Date(Math.min(...parsedDates));
+    const maxDate = new Date(Math.max(...parsedDates));
+    filename = `לוח משחקים לתאריך ${formatDateDDMMYYYY(minDate)} עד ${formatDateDDMMYYYY(maxDate)}`;
+  }
+  saveFile(filename.replace(/\//g, '-') + ".txt", new Blob([text], { type: "text/plain;charset=utf-8" }))
+    .then(ok => { if (ok !== false) showToast("קובץ הטקסט מוכן!"); });
+}
+
+// ---------- שמירת קבצים: בדפדפן = הורדה, באפליקציה = חלון שיתוף/שמירה ----------
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(',')[1] || "");
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
+}
+async function saveFile(filename, blob) {
+  if (isNative()) {
+    try {
+      const data = await blobToBase64(blob);
+      const res = await nativeCall('Filesystem', 'writeFile', { path: filename, data, directory: 'CACHE' });
+      await nativeCall('Share', 'share', { title: filename, files: [res.uri], dialogTitle: 'שמירה / שליחה של הקובץ' });
+      return true;
+    } catch (e) {
+      if (e && /cancel/i.test(String(e.message || e))) return false;
+      alert("לא הצלחתי לשמור את הקובץ: " + (e && e.message ? e.message : e));
+      return false;
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  return true;
+}
+
+// =====================================================================
+//  הקראה קולית (TTS) — בדפדפן ובאפליקציה
+// =====================================================================
+function splitForSpeech(text, maxLen) {
+  const lines = String(text || "").split(/\n+/).map(s => s.replace(/-{3,}/g, "").trim()).filter(Boolean);
+  const chunks = [];
+  let cur = "";
+  lines.forEach(line => {
+    if ((cur + "\n" + line).length > maxLen && cur) { chunks.push(cur); cur = line; }
+    else cur = cur ? cur + "\n" + line : line;
+  });
+  if (cur) chunks.push(cur);
+  return chunks;
+}
+let speechToken = 0;
+function speechRate() { return parseFloat(document.getElementById("rate").value) || 1.0; }
+async function speakText(text) {
+  stopSpeech();
+  const token = ++speechToken;
+  if (isNative()) {
+    for (const chunk of splitForSpeech(text, 3000)) {
+      if (token !== speechToken) return;
+      try {
+        await nativeCall('TextToSpeech', 'speak', { text: chunk, lang: 'he-IL', rate: speechRate(), pitch: 1.0, volume: 1.0, category: 'playback', queueStrategy: 0 });
+      } catch (e) {
+        if (token !== speechToken) return;
+        alert("ההקראה לא זמינה. ודא שמותקן במכשיר מנוע 'שירותי דיבור של Google' עם קול בעברית (הגדרות ← נגישות ← המרת טקסט לדיבור).\n\n" + (e && e.message ? e.message : e));
+        return;
+      }
+    }
+    return;
+  }
+  if (!('speechSynthesis' in window)) { alert("הדפדפן שלך אינו תומך בהקראה קולית מובנית."); return; }
+  splitForSpeech(text, 900).forEach(chunk => {
+    const u = new SpeechSynthesisUtterance(chunk);
+    u.lang = 'he-IL';
+    u.rate = speechRate();
+    window.speechSynthesis.speak(u);
+  });
+}
+function stopSpeech() {
+  speechToken++;
+  if (isNative()) { nativeCall('TextToSpeech', 'stop', {}).catch(() => {}); return; }
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+}
+function playAll() { speakText(generateFullText()); }
+function playDay(dayIdx) { speakText(buildDayText(dayIdx)); }
+function playSingleMatch(dayIdx, leagueIdx, matchIdx) {
+  const m = scheduleData[dayIdx] && scheduleData[dayIdx].leagues[leagueIdx] && scheduleData[dayIdx].leagues[leagueIdx].matches[matchIdx];
+  if (m) speakText(matchLine(m));
+}
+
+// ---------- הקלטת ההקראה והורדה כקובץ MP3 (דפדפן Chrome/Edge במחשב) ----------
+function recordAllToMp3() { recordSpeechToMp3(generateFullText(), "לוח_משחקים_מלא"); }
+function recordDayToMp3(dayIdx) { recordSpeechToMp3(buildDayText(dayIdx), `לוח_משחקים_יום_${dayIdx + 1}`); }
+async function recordSpeechToMp3(text, filenameBase) {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) { alert("הדפדפן שלך לא תומך בהקלטת אודיו מהדף. נסה ב-Chrome או Edge במחשב."); return; }
+  if (typeof lamejs === "undefined") { alert("ספריית ההמרה ל-MP3 לא נטענה. ודא שיש חיבור אינטרנט ונסה שוב."); return; }
+  let displayStream;
+  try { displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true }); }
+  catch (err) { alert("ההקלטה בוטלה — לא אושרה גישה לשיתוף מסך/אודיו."); return; }
+  const audioTracks = displayStream.getAudioTracks();
+  if (audioTracks.length === 0) {
+    alert('לא סומנה אפשרות שיתוף האודיו בחלון הבחירה (לרוב נקראת "Share tab audio" או "שתף אודיו"). נסה שוב ווודא לסמן אותה.');
+    displayStream.getTracks().forEach(t => t.stop());
+    return;
+  }
+  displayStream.getVideoTracks().forEach(t => t.stop());
+  const audioOnlyStream = new MediaStream(audioTracks);
+  const chunks = [];
+  const recorder = new MediaRecorder(audioOnlyStream);
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  recorder.onstop = async () => {
+    showToast("ממיר להקלטת MP3, רגע...", 4000);
+    await convertBlobToMp3AndDownload(new Blob(chunks, { type: "audio/webm" }), filenameBase);
+  };
+  recorder.start();
+  showToast("מקליט... אל תסגור את הלשונית עד לסיום ההקראה", 4000);
+  window.speechSynthesis.cancel();
+  const stopEverything = () => {
+    setTimeout(() => { if (recorder.state !== "inactive") recorder.stop(); audioTracks.forEach(t => t.stop()); }, 400);
+  };
+  const parts = splitForSpeech(text, 900);
+  parts.forEach((part, i) => {
+    const u = new SpeechSynthesisUtterance(part);
+    u.lang = "he-IL";
+    u.rate = speechRate();
+    if (i === parts.length - 1) { u.onend = stopEverything; }
+    u.onerror = stopEverything;
+    window.speechSynthesis.speak(u);
+  });
+  if (!parts.length) stopEverything();
+}
+async function convertBlobToMp3AndDownload(webmBlob, filenameBase) {
+  try {
+    const arrayBuffer = await webmBlob.arrayBuffer();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    const numChannels = audioBuffer.numberOfChannels > 1 ? 2 : 1;
+    const sampleRate = audioBuffer.sampleRate;
+    const left = audioBuffer.getChannelData(0);
+    const right = numChannels === 2 ? audioBuffer.getChannelData(1) : null;
+    function floatTo16BitPCM(input) {
+      const output = new Int16Array(input.length);
+      for (let i = 0; i < input.length; i++) { const s = Math.max(-1, Math.min(1, input[i])); output[i] = s < 0 ? s * 0x8000 : s * 0x7FFF; }
+      return output;
+    }
+    const left16 = floatTo16BitPCM(left);
+    const right16 = right ? floatTo16BitPCM(right) : null;
+    const encoder = new lamejs.Mp3Encoder(numChannels, sampleRate, 128);
+    const sampleBlockSize = 1152;
+    const mp3Data = [];
+    for (let i = 0; i < left16.length; i += sampleBlockSize) {
+      const leftChunk = left16.subarray(i, i + sampleBlockSize);
+      const mp3buf = right16 ? encoder.encodeBuffer(leftChunk, right16.subarray(i, i + sampleBlockSize)) : encoder.encodeBuffer(leftChunk);
+      if (mp3buf.length > 0) mp3Data.push(new Int8Array(mp3buf));
+    }
+    const endBuf = encoder.flush();
+    if (endBuf.length > 0) mp3Data.push(new Int8Array(endBuf));
+    await saveFile(`${filenameBase}.mp3`, new Blob(mp3Data, { type: "audio/mp3" }));
+    showToast("קובץ ה-MP3 ירד בהצלחה!");
+  } catch (err) {
+    alert("אירעה שגיאה בהמרת ההקלטה ל-MP3: " + err.message);
+  }
+}
+
+// ---------- העתקה ושיתוף ----------
+async function copyText(text) {
+  if (isNative()) { try { await nativeCall('Clipboard', 'write', { string: text }); return true; } catch (e) {} }
+  try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch (e) { return false; }
+}
+function copyFormattedText() {
+  const text = document.getElementById("outputArea").value;
+  copyText(text).then(ok => showToast(ok ? "הטקסט הועתק בהצלחה!" : "ההעתקה נכשלה — סמן את הטקסט והעתק ידנית"));
+}
+async function shareFormattedText() {
+  const text = document.getElementById("outputArea").value;
+  if (!text) { showToast("הלוח ריק"); return; }
+  try {
+    if (isNative()) { await nativeCall('Share', 'share', { title: 'לוח משחקים', text, dialogTitle: 'שליחה לבוט' }); return; }
+    if (navigator.share) { await navigator.share({ text }); return; }
+  } catch (e) { if (e && /cancel|abort/i.test(String(e.message || e.name || e))) return; }
+  copyFormattedText();
+}
+function showToast(message, duration = 2500) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.style.display = "block";
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => { toast.style.display = "none"; }, duration);
+}
+
+// ---------- טעינה ראשונית ----------
+seedDictionary();
+document.getElementById('nikudToggle').checked = !!settings.nikudOutput;
+if (loadJSON('scheduleUndo')) document.getElementById('undoImportBtn').classList.remove('hidden');
+populateTimeSelect();
+refreshLeagueSelects();
+renderSchedule();
+</script>
+</body>
+</html>
