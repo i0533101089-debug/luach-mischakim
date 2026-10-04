@@ -3,6 +3,9 @@ name: בניית APK ואתר
 on:
   push:
     branches: [main, master]
+    paths-ignore:
+      - 'data/**'
+      - 'README.md'
   workflow_dispatch:
 
 permissions:
@@ -24,6 +27,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Excel/MP3 libraries next to the site
+        run: |
+          mkdir -p www/vendor
+          curl -fsSL https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js -o www/vendor/xlsx.full.min.js || true
+          curl -fsSL https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js -o www/vendor/lame.min.js || true
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
@@ -55,24 +64,26 @@ jobs:
       - name: Install packages
         run: npm install --no-audit --no-fund
 
-      - name: Bundle Excel/MP3 libraries inside the app (works offline)
+      - name: Excel/MP3 libraries inside the app (works offline)
         run: |
-          mkdir -p www/lib
-          if curl -fsSL https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js -o www/lib/xlsx.full.min.js; then
-            sed -i 's#https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js#lib/xlsx.full.min.js#' www/index.html
-          fi
-          if curl -fsSL https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js -o www/lib/lame.min.js; then
-            sed -i 's#https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js#lib/lame.min.js#' www/index.html
-          fi
+          mkdir -p www/vendor
+          curl -fsSL https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js -o www/vendor/xlsx.full.min.js || true
+          curl -fsSL https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js -o www/vendor/lame.min.js || true
 
       - name: Create Android project
         run: npx cap add android
 
-      - name: App icon, splash, version and fixed signing key
+      - name: Hebrew speech plugin, icon, splash, version and fixed signing key
         run: |
+          JAVA_DIR=android/app/src/main/java/com/luach/mischakim
+          mkdir -p "$JAVA_DIR"
+          cp android-src/HebrewTtsPlugin.java "$JAVA_DIR/"
+          cp android-src/MainActivity.java "$JAVA_DIR/"
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          grep -q TTS_SERVICE "$MANIFEST" || sed -i 's#<application#<queries>\n        <intent>\n            <action android:name="android.intent.action.TTS_SERVICE" />\n        </intent>\n    </queries>\n\n    <application#' "$MANIFEST"
           unzip -o -q android-res.zip -d android/app/src/main/res/
           sed -i "s/versionCode 1$/versionCode ${{ github.run_number }}/" android/app/build.gradle
-          sed -i "s/versionName \"1.0\"/versionName \"2.0.${{ github.run_number }}\"/" android/app/build.gradle
+          sed -i "s/versionName \"1.0\"/versionName \"2.1.${{ github.run_number }}\"/" android/app/build.gradle
           cat >> android/app/build.gradle <<'EOF'
 
           // חתימה קבועה — כדי שכל גרסה חדשה תותקן מעל הקודמת בלי למחוק נתונים
@@ -87,6 +98,8 @@ jobs:
               }
           }
           EOF
+          echo "----- manifest -----"; cat "$MANIFEST"
+          echo "----- main activity -----"; cat "$JAVA_DIR/MainActivity.java"
 
       - name: Sync web app and plugins
         run: npx cap sync android
@@ -109,8 +122,8 @@ jobs:
       - name: Publish to Releases (easy download from the phone)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.0.${{ github.run_number }}
-          name: לוח משחקים 2.0.${{ github.run_number }}
-          body: הורד את הקובץ luach-mischakim.apk מהטלפון והתקן אותו.
+          tag_name: v2.1.${{ github.run_number }}
+          name: לוח משחקים 2.1.${{ github.run_number }}
+          body: הורד את הקובץ luach-mischakim.apk מהטלפון והתקן אותו (מעל הגרסה הקודמת — הנתונים נשמרים).
           files: luach-mischakim.apk
           make_latest: true
