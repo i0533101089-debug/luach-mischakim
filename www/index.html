@@ -170,6 +170,20 @@ details.card[open] > summary { margin-bottom: 12px; }
   .match-actions .icon-btn { padding: 8px 10px; font-size: .92rem; }
   input, select, textarea { font-size: 16px; }
 }
+
+/* ===== תוצאות ===== */
+.results-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.results-controls .form-group { flex: 1 1 140px; }
+.results-controls > button { flex: 1 1 200px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.chips button { padding: 6px 12px; font-size: .85rem; border-radius: 16px; font-weight: 500; }
+.res-score { font-weight: 800; color: var(--text-bright); background: var(--bg-card-hover); border: 1px solid var(--border); padding: 2px 10px; border-radius: 6px; font-size: 1rem; white-space: nowrap; }
+.res-row strong.win { color: var(--accent-green-hover); }
+.badge-et { background: rgba(88,166,255,.15); color: var(--accent-blue); padding: 2px 6px; border-radius: 4px; font-size: .72rem; }
+#resultsModal .day-section { margin-top: 14px; }
+.modal-box > h2 { position: sticky; top: -18px; z-index: 6; background: var(--bg-card); margin: -18px -18px 12px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+#resOutput { width: 100%; height: 170px; resize: vertical; white-space: pre-wrap; line-height: 1.6; font-size: .95rem; margin: 8px 0; }
+@media (max-width: 600px) { .modal-box > h2 { top: 0; margin: 0 -14px 12px; padding: 12px 14px; } #resultsModal .modal-foot button { flex: 1 1 0; padding: 12px 4px; font-size: .9rem; } }
 </style>
 </head>
 <body>
@@ -198,6 +212,9 @@ details.card[open] > summary { margin-bottom: 12px; }
   </div>
   <div class="grow">
     <button class="btn-primary btn-big" id="btnFetch" style="width:100%">🔄 משוך משחקים מ-365</button>
+  </div>
+  <div class="grow">
+    <button class="btn-blue btn-big" id="btnResults" style="width:100%">📊 משוך תוצאות</button>
   </div>
   <div class="muted" id="fetchInfo" style="flex-basis:100%"></div>
 </div>
@@ -416,6 +433,39 @@ details.card[open] > summary { margin-bottom: 12px; }
       <div class="modal-section">
         <p class="muted">גרסה <span id="appVersion"></span></p>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== מודאל תוצאות ===== -->
+<div class="modal-overlay" id="resultsModal">
+  <div class="modal-box">
+    <h2><span>📊 תוצאות המשחקים</span><button class="icon-btn" data-close="resultsModal">✖ סגור</button></h2>
+    <div class="results-controls">
+      <div class="form-group"><label for="resFrom">מתאריך</label><input type="date" id="resFrom"></div>
+      <div class="form-group"><label for="resTo">עד תאריך</label><input type="date" id="resTo"></div>
+      <button class="btn-blue btn-big" data-res="fetch">📊 משוך תוצאות</button>
+    </div>
+    <div class="chips">
+      <button data-res="range" data-from="1" data-to="1">אתמול</button>
+      <button data-res="range" data-from="0" data-to="0">היום</button>
+      <button data-res="range" data-from="3" data-to="0">3 ימים אחרונים</button>
+      <button data-res="range" data-from="7" data-to="0">שבוע אחרון</button>
+      <button data-res="range" data-from="14" data-to="0">שבועיים</button>
+    </div>
+    <div class="muted" id="resInfo" style="margin-top:8px;"></div>
+    <div id="resWarn" style="margin-top:10px;"></div>
+    <div id="resList"></div>
+    <div class="output-box" style="margin-top:14px;">
+      <h3 style="color:var(--text-bright);">📝 הטקסט לבוט:</h3>
+      <textarea id="resOutput" readonly></textarea>
+      <label class="inline-row" style="cursor:pointer;"><input type="checkbox" id="resDigits" style="flex:none;"> <span>תוצאה בספרות (2:1) במקום במילים</span></label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-export" data-res="copy">📋 העתק</button>
+      <button class="btn-blue" data-res="share">📤 שלח</button>
+      <button data-res="play" id="resPlay">🔊 השמע</button>
+      <button data-res="mp3">🎙️ MP3</button>
     </div>
   </div>
 </div>
@@ -2308,11 +2358,11 @@ window.DEFAULTS.nameMap = {"מכבי תל אביב": "מַכַּבִּי תֵּ�
   const ddmmyyyy = iso => { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; };
   function check(isCancelled) { if (isCancelled && isCancelled()) { const e = new Error('cancelled'); e.cancelled = true; throw e; } }
   /** בקשה עם 3 ניסיונות (השרת של 365 מחזיר לפעמים 503 או נתקע) */
-  async function fetchJsonRetry(url, isCancelled) {
+  async function fetchJsonRetry(url, isCancelled, ms) {
     let last;
     for (let i = 0; i < 3; i++) {
       check(isCancelled);
-      try { return await fetchJson(url, 20000); } catch (e) { last = e; }
+      try { return await fetchJson(url, ms || 20000); } catch (e) { last = e; }
       await sleep(1200 * (i + 1));
     }
     throw last || new Error('אין חיבור ל-365');
@@ -2424,7 +2474,57 @@ window.DEFAULTS.nameMap = {"מכבי תל אביב": "מַכַּבִּי תֵּ�
     throw lastErr || new Error('הנקדן לא זמין');
   }
 
-  global.Api365 = { fetchWeek, search, dictaNakdan };
+  /**
+   * תוצאות: /web/games/results מחזיר משחקים שהסתיימו, מהחדש לישן.
+   * ממשיכים לעמודים קודמים (previousPage) עד שעוברים את תאריך ההתחלה.
+   * (המסלול עם תאריכים — /web/games — מחזיר רק משחקים עתידיים)
+   */
+  async function fetchResultsFor(param, fromIso, toIso, isCancelled) {
+    const games = new Map(), competitions = new Map();
+    let url = `${HOST}/web/games/results/?${COMMON}&${param}`;
+    for (let page = 0; page < 40 && url; page++) {
+      const j = await fetchJsonRetry(url, isCancelled, 12000);
+      (j.competitions || []).forEach(c => competitions.set(c.id, c));
+      const gs = j.games || [];
+      if (!gs.length) break;
+      let oldest = '9999-99-99';
+      gs.forEach(g => {
+        const p = Heb.israelParts(g.startTime);
+        if (p.date < oldest) oldest = p.date;
+        if (p.date >= fromIso && p.date <= toIso) games.set(g.id, g);
+      });
+      if (oldest < fromIso) break;
+      const prev = j.paging && j.paging.previousPage;
+      url = prev ? (String(prev).startsWith('http') ? prev : HOST + prev) : null;
+    }
+    return { games, competitions };
+  }
+  async function fetchResults({ competitionIds, teamIds, fromIso, toIso, onProgress, isCancelled }) {
+    const allGames = new Map(), allComps = new Map();
+    const chunk = (arr, n) => { const out = []; for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n)); return out; };
+    const compSet = new Set(competitionIds.map(Number)), teamSet = new Set(teamIds.map(Number));
+    const jobs = [];
+    chunk(competitionIds, 12).forEach(ids => jobs.push({ param: 'competitions=' + ids.join(','), keep: g => compSet.has(Number(g.competitionId)) }));
+    chunk(teamIds, 12).forEach(ids => jobs.push({ param: 'competitors=' + ids.join(','), keep: g => teamSet.has(Number(g.homeCompetitor && g.homeCompetitor.id)) || teamSet.has(Number(g.awayCompetitor && g.awayCompetitor.id)) }));
+    let done = 0, failed = 0, lastErr = null, next = 0;
+    async function worker() {
+      while (next < jobs.length) {
+        const job = jobs[next++];
+        try {
+          const r = await fetchResultsFor(job.param, fromIso, toIso, isCancelled);
+          r.games.forEach((g, id) => { if (job.keep(g)) allGames.set(id, g); });
+          r.competitions.forEach((c, id) => allComps.set(id, c));
+        } catch (e) { if (e.cancelled) throw e; failed++; lastErr = e; }
+        done++; if (onProgress) onProgress(done, jobs.length);
+      }
+    }
+    await Promise.all([worker(), worker()]);
+    check(isCancelled);
+    if (jobs.length && failed === jobs.length) throw lastErr || new Error('אין חיבור ל-365');
+    return { games: [...allGames.values()], competitions: allComps, failed };
+  }
+
+  global.Api365 = { fetchWeek, fetchResults, search, dictaNakdan };
 })(window);
 </script>
 <script>/* ============================================================
@@ -2882,7 +2982,7 @@ window.DEFAULTS.nameMap = {"מכבי תל אביב": "מַכַּבִּי תֵּ�
    ============================================================ */
 (function () {
   'use strict';
-  const APP_VERSION = '2.2.0';
+  const APP_VERSION = '2.3.0';
   const STORE_KEY = 'luach_v2';
   const D = window.DEFAULTS;
   const COMMON_TIMES = new Set(['14:30', '16:00', '17:00', '19:00', '19:30', '19:45', '20:00', '20:15', '20:30', '21:00', '21:45', '22:00', '22:30']);
@@ -2923,7 +3023,8 @@ window.DEFAULTS.nameMap = {"מכבי תל אביב": "מַכַּבִּי תֵּ�
       matches: [],
       notes: {},
       deleted: {},
-      lastFetch: null
+      lastFetch: null,
+      results: null
     };
   }
   let state;
@@ -3182,6 +3283,7 @@ window.DEFAULTS.nameMap = {"מכבי תל אביב": "מַכַּבִּי תֵּ�
     $('#outputArea').value = generateText();
     renderWarnings(unresolvedTeams, unresolvedLeagues);
     renderFetchInfo();
+    renderResults();
   }
   let lastUnresolved = { teams: new Map(), leagues: new Map() };
   function renderWarnings(teams, leagues) {
@@ -3255,6 +3357,239 @@ window.DEFAULTS.nameMap = {"מכבי תל אביב": "מַכַּבִּי תֵּ�
       toast('המשיכה מ-365 נכשלה: ' + (e.message || e) + '. בדוק חיבור לאינטרנט ונסה שוב.', true, 6000);
     }
   }
+  // ============ תוצאות ============
+  const NUM_NIQ = ['אֶפֶס', 'אַחַת', 'שְׁתַּיִם', 'שָׁלוֹשׁ', 'אַרְבַּע', 'חָמֵשׁ', 'שֵׁשׁ', 'שֶׁבַע', 'שְׁמוֹנֶה', 'תֵּשַׁע', 'עֶשֶׂר', 'אַחַת עֶשְׂרֵה', 'שְׁתֵּים עֶשְׂרֵה', 'שְׁלוֹשׁ עֶשְׂרֵה', 'אַרְבַּע עֶשְׂרֵה', 'חֲמֵשׁ עֶשְׂרֵה', 'שֵׁשׁ עֶשְׂרֵה', 'שְׁבַע עֶשְׂרֵה', 'שְׁמוֹנֶה עֶשְׂרֵה', 'תְּשַׁע עֶשְׂרֵה', 'עֶשְׂרִים'];
+  const NUM_PLAIN = ['אפס', 'אחת', 'שתיים', 'שלוש', 'ארבע', 'חמש', 'שש', 'שבע', 'שמונה', 'תשע', 'עשר', 'אחת עשרה', 'שתים עשרה', 'שלוש עשרה', 'ארבע עשרה', 'חמש עשרה', 'שש עשרה', 'שבע עשרה', 'שמונה עשרה', 'תשע עשרה', 'עשרים'];
+  const RT = {
+    niqqud: {
+      header: d => `תּוֹצְאוֹת הַמִּשְׂחָקִים מִ${d.replace(/^יוֹם/, 'יּוֹם')}`,
+      beat: 'נִצְּחָה אֶת', beatAway: 'נִצְּחָה בַּחוּץ אֶת', draw: 'סִיְּמָה בְּתֵיקוּ', vs: 'מוּל',
+      et: 'אַחֲרֵי הַאֲרָכָה', pens: 'בְּפֶנְדָּלִים', pensWon: 'וּבְפֶנְדָּלִים נִצְּחָה',
+      status: { 'נדחה': 'נִדְחָה', 'בוטל': 'בּוּטַל', 'הופסק': 'הוּפְסַק', 'לא יתקיים': 'לֹא יִתְקַיֵּם', 'ננטש': 'נִנְטַשׁ' }
+    },
+    plain: {
+      header: d => `תוצאות המשחקים מ${d}`,
+      beat: 'ניצחה את', beatAway: 'ניצחה בחוץ את', draw: 'סיימה בתיקו', vs: 'מול',
+      et: 'אחרי הארכה', pens: 'בפנדלים', pensWon: 'ובפנדלים ניצחה', status: {}
+    }
+  };
+  function numWord(n) { const arr = state.settings.niqqud ? NUM_NIQ : NUM_PLAIN; return (n >= 0 && n < arr.length) ? arr[n] : String(n); }
+  function scorePair(a, b) { return state.settings.resultsDigits ? `${a}:${b}` : `${numWord(a)} ${numWord(b)}`; }
+  function resultSentence(v) {
+    const T = state.settings.niqqud ? RT.niqqud : RT.plain;
+    const r = v.r, H = v.home.name, A = v.away.name;
+    if (!r.played) return `${H} ${T.vs} ${A}: ${T.status[r.statusText] || r.statusText || '—'}`;
+    const extra = (r.et ? ' ' + T.et : '');
+    if (r.hs > r.as) return `${H} ${T.beat} ${A} ${scorePair(r.hs, r.as)}${extra}${r.pens ? ' ' + T.pens : ''}`;
+    if (r.as > r.hs) return `${A} ${T.beatAway} ${H} ${scorePair(r.as, r.hs)}${extra}${r.pens ? ' ' + T.pens : ''}`;
+    let s = `${H} ${T.draw} ${scorePair(r.hs, r.as)} ${T.vs} ${A}${extra}`;
+    if (r.pens && r.penWinner) s += `, ${T.pensWon} ${r.penWinner === 1 ? H : A}`;
+    return s;
+  }
+  function toResult(g, competitions, prev) {
+    const p = Heb.israelParts(g.startTime);
+    const comp = competitions.get(g.competitionId);
+    const hc = g.homeCompetitor || {}, ac = g.awayCompetitor || {};
+    const hs = Number(hc.score), as = Number(ac.score);
+    const statusText = String(g.statusText || '').trim();
+    const played = Number.isFinite(hs) && Number.isFinite(as) && hs >= 0 && as >= 0 && !/נדח|בוטל|הופסק|לא יתקיים|ננטש/.test(statusText);
+    const pens = played && /פנדל/.test(statusText);
+    const old = prev.get(g.id);
+    return {
+      gameId: g.id, compId: g.competitionId, comp365: (comp && comp.name) || g.competitionDisplayName || '',
+      date: p.date, time: p.time,
+      homeId: hc.id, home365: hc.name, awayId: ac.id, away365: ac.name,
+      hs: played ? hs : null, as: played ? as : null, played, pens,
+      et: played && !pens && /הארכה/.test(statusText),
+      penWinner: pens ? (hc.isWinner ? 1 : ac.isWinner ? 2 : 0) : 0,
+      statusText, excluded: old ? !!old.excluded : !played
+    };
+  }
+  function buildResultDays() {
+    const res = state.results;
+    if (!res || !Array.isArray(res.games)) return [];
+    const days = new Map();
+    res.games.forEach(r => {
+      const lg = compInfo(r.compId, r.comp365);
+      const v = { r, league: lg, home: resolveTeam(r.homeId, r.home365, lg.name), away: resolveTeam(r.awayId, r.away365, lg.name) };
+      if (!days.has(r.date)) days.set(r.date, new Map());
+      const L = days.get(r.date);
+      if (!L.has(lg.name)) L.set(lg.name, { name: lg.name, ok: lg.ok, order: lg.order, compId: r.compId, comp365: r.comp365, items: [] });
+      L.get(lg.name).items.push(v);
+    });
+    return [...days.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([date, L]) => ({
+      date,
+      leagues: [...L.values()]
+        .map(l => { l.items.sort((x, y) => x.r.time.localeCompare(y.r.time) || String(x.home.name).localeCompare(String(y.home.name))); return l; })
+        .sort((a, b) => a.order - b.order || a.items[0].r.time.localeCompare(b.items[0].r.time) || a.name.localeCompare(b.name))
+    }));
+  }
+  function resultsText(onlyDate) {
+    const niq = state.settings.niqqud, T = niq ? RT.niqqud : RT.plain;
+    let out = '';
+    buildResultDays().forEach(day => {
+      if (onlyDate && day.date !== onlyDate) return;
+      const leagues = day.leagues.map(l => ({ ...l, items: l.items.filter(v => !v.r.excluded) })).filter(l => l.items.length);
+      if (!leagues.length) return;
+      out += `${T.header(Heb.dayLabel(day.date, niq))}:\n\n`;
+      leagues.forEach(l => {
+        out += `${l.name}:\n`;
+        l.items.forEach(v => { out += resultSentence(v) + '.\n'; });
+        out += '\n';
+      });
+      out += Heb.T.plain.separator + '\n\n';
+    });
+    return out.trim();
+  }
+  let resUnresolved = { teams: new Map(), leagues: new Map() };
+  function renderResults() {
+    const list = $('#resList');
+    if (!list) return;
+    const res = state.results;
+    const days = buildResultDays();
+    const teams = new Map(), leagues = new Map();
+    let total = 0, included = 0;
+    if (!res) {
+      list.innerHTML = `<div class="empty-state"><div class="big">📊</div><div>בחר תאריכים ולחץ <b>📊 משוך תוצאות</b> — יגיעו התוצאות של כל הליגות והקבוצות שלך.</div></div>`;
+    } else if (!days.length) {
+      list.innerHTML = `<div class="empty-state"><div class="big">🔍</div><div>לא נמצאו משחקים שהסתיימו בתאריכים האלה בליגות שלך.</div></div>`;
+    } else {
+      list.innerHTML = days.map(day => {
+        let dc = 0, di = 0;
+        const lh = day.leagues.map(l => {
+          const lgName = l.ok ? esc(l.name) : `<span class="unvocalized" data-res="fix" title="אין ניקוד — לחץ לתיקון">⚠️ ${esc(l.name)}</span>`;
+          if (!l.ok && l.compId != null && l.items.some(v => !v.r.excluded)) leagues.set(l.compId, l);
+          const allOn = l.items.every(v => !v.r.excluded);
+          const rows = l.items.map(v => {
+            const r = v.r;
+            dc++; total++; if (!r.excluded) { di++; included++; }
+            const tn = (t, id, n365, win) => {
+              if (t.ok) return `<strong class="${win ? 'win' : ''}">${esc(t.name)}</strong>`;
+              if (!r.excluded && id != null) teams.set(id, { id, name365: n365, league: l.name });
+              return `<strong class="unvocalized" data-res="fix" data-team="${esc(id)}" title="אין ניקוד — לחץ לתיקון">⚠️ ${esc(t.name)}</strong>`;
+            };
+            const hw = r.played && (r.hs > r.as || (r.pens && r.penWinner === 1));
+            const aw = r.played && (r.as > r.hs || (r.pens && r.penWinner === 2));
+            const score = r.played ? `<span class="res-score">${r.hs} – ${r.as}</span>` : `<span class="badge-status">${esc(r.statusText || 'לא שוחק')}</span>`;
+            const badges = (r.et ? '<span class="badge-et">הארכה</span>' : '') + (r.pens ? '<span class="badge-et">פנדלים</span>' : '');
+            return `<div class="match-row res-row ${r.excluded ? 'excluded' : ''}" data-gid="${esc(r.gameId)}">
+              <div class="match-main">
+                <input type="checkbox" data-res="toggle" ${r.excluded ? '' : 'checked'} title="כלול בטקסט">
+                <div class="match-teams">${tn(v.home, r.homeId, r.home365, hw)} ${score} ${tn(v.away, r.awayId, r.away365, aw)} ${badges}</div>
+              </div>
+              <div class="match-actions">
+                <span class="match-time">${esc(r.time)}</span>
+                <button class="icon-btn" data-res="play1" title="השמע">🔊</button>
+              </div>
+            </div>`;
+          }).join('');
+          return `<div class="league-block" data-league="${esc(l.name)}" data-date="${day.date}">
+            <div class="league-title"><span>🏆 ${lgName}:</span><span class="actions"><button class="icon-btn" data-res="league-toggle" title="${allOn ? 'הוצא את כל הליגה' : 'כלול את כל הליגה'}">${allOn ? '☑️' : '⬜'}</button></span></div>
+            ${rows}
+          </div>`;
+        }).join('');
+        const allDayOn = day.leagues.every(l => l.items.every(v => !v.r.excluded));
+        return `<div class="day-section" data-date="${day.date}">
+          <div class="day-header">
+            <span>📅 ${esc(Heb.dayLabel(day.date, false))} <span class="count">(${di} מתוך ${dc})</span></span>
+            <div class="match-actions">
+              <button class="icon-btn" data-res="day-toggle" title="${allDayOn ? 'הוצא את כל היום' : 'כלול את כל היום'}">${allDayOn ? '☑️' : '⬜'}</button>
+              <button class="icon-btn" data-res="day-copy" style="color:#fff">📋 העתק יום</button>
+              <button class="icon-btn" data-res="day-play" style="color:#fff">🔊 השמע יום</button>
+            </div>
+          </div>
+          ${lh}
+        </div>`;
+      }).join('');
+    }
+    resUnresolved = { teams, leagues };
+    const n = teams.size + leagues.size;
+    $('#resWarn').innerHTML = n ? `<div class="warn-box"><span>⚠️ ${n} שמות בלי ניקוד. מנקדים פעם אחת — ונשמר לתמיד (גם ללוח המשחקים).</span><button class="btn-manage" data-res="fix">✍️ נקד עכשיו</button></div>` : '';
+    $('#resOutput').value = resultsText();
+    $('#resDigits').checked = !!state.settings.resultsDigits;
+    $('#resInfo').textContent = res ? `משיכה אחרונה: ${new Date(res.at).toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' })} — ${total} משחקים (${included} בטקסט), ${Heb.isoToDDMMYYYY(res.from).replace(/-/g, '/')} עד ${Heb.isoToDDMMYYYY(res.to).replace(/-/g, '/')}` : '';
+  }
+  function setResRange(fromBack, toBack) {
+    const today = Heb.todayIsraelIso();
+    $('#resFrom').value = Heb.addDays(today, -fromBack);
+    $('#resTo').value = Heb.addDays(today, -toBack);
+  }
+  function openResults() {
+    const today = Heb.todayIsraelIso();
+    $('#resFrom').max = today; $('#resTo').max = today;
+    if (state.results && state.results.from) { $('#resFrom').value = state.results.from; $('#resTo').value = state.results.to; }
+    else if (!$('#resFrom').value) setResRange(7, 0);
+    renderResults();
+    openModal('resultsModal');
+  }
+  async function doFetchResults() {
+    const today = Heb.todayIsraelIso();
+    let from = $('#resFrom').value, to = $('#resTo').value || today;
+    if (!from) from = to;
+    if (to > today) to = today;
+    if (from > to) { const t = from; from = to; to = t; }
+    if (Heb.addDays(from, 62) < to) { toast('אפשר לבקש עד חודשיים בכל פעם', true); return; }
+    $('#resFrom').value = from; $('#resTo').value = to;
+    const compIds = state.comps.filter(c => c.enabled).map(c => c.id);
+    const teamIds = state.teams.filter(t => t.enabled).map(t => t.id);
+    if (!compIds.length && !teamIds.length) { toast('אין ליגות או קבוצות במעקב. הוסף ב"ניהול".', true); return; }
+    const myRun = ++fetchRun;
+    busy(true, 'מושך תוצאות מ-365...', true);
+    try {
+      const { games, competitions, failed } = await Api365.fetchResults({
+        competitionIds: compIds, teamIds, fromIso: from, toIso: to,
+        onProgress: (d, n) => { if (myRun === fetchRun) busy(true, `מושך תוצאות מ-365... (${d}/${n})`, true); },
+        isCancelled: () => myRun !== fetchRun
+      });
+      if (myRun !== fetchRun) return;
+      const prev = new Map(((state.results && state.results.games) || []).map(r => [r.gameId, r]));
+      state.results = { from, to, at: Date.now(), games: games.map(g => toResult(g, competitions, prev)) };
+      save(); renderResults();
+      busy(false);
+      const n = resUnresolved.teams.size + resUnresolved.leagues.size;
+      const cnt = state.results.games.length;
+      toast(cnt ? `נמשכו ${cnt} תוצאות${n ? ` — ${n} שמות צריכים ניקוד` : ' ✔'}${failed ? ' (חלק מהליגות לא נטענו — נסה שוב)' : ''}` : 'לא נמצאו משחקים שהסתיימו בתאריכים האלה', !cnt || !!failed, 4500);
+      if (n) setTimeout(() => openFix(null, 'results'), 600);
+    } catch (e) {
+      if (e && e.cancelled) return;
+      if (myRun !== fetchRun) return;
+      busy(false);
+      console.error(e);
+      toast('משיכת התוצאות נכשלה: ' + (e.message || e) + '. בדוק חיבור לאינטרנט ונסה שוב.', true, 6000);
+    }
+  }
+  function resultsByDate(date, league) {
+    return ((state.results && state.results.games) || []).filter(r => r.date === date && (league == null || compInfo(r.compId, r.comp365).name === league));
+  }
+  function resFileName() {
+    const r = state.results; if (!r) return 'תוצאות';
+    return r.from === r.to ? `תוצאות ${Heb.isoToDDMMYYYY(r.from)}` : `תוצאות ${Heb.isoToDDMMYYYY(r.from)} עד ${Heb.isoToDDMMYYYY(r.to)}`;
+  }
+  $('#btnResults').addEventListener('click', openResults);
+  $('#resDigits').addEventListener('change', e => { state.settings.resultsDigits = e.target.checked; save(); renderResults(); });
+  $('#resultsModal').addEventListener('click', e => {
+    const b = e.target.closest('[data-res]'); if (!b) return;
+    const act = b.dataset.res;
+    const row = b.closest('.res-row'), lgEl = b.closest('.league-block'), dayEl = b.closest('.day-section');
+    const r = row ? ((state.results && state.results.games) || []).find(x => String(x.gameId) === row.dataset.gid) : null;
+    const text = () => resultsText();
+    switch (act) {
+      case 'fetch': doFetchResults(); break;
+      case 'range': setResRange(+b.dataset.from, +b.dataset.to); break;
+      case 'toggle': if (r) { r.excluded = !b.checked; save(); renderResults(); } break;
+      case 'play1': if (r) { const lg = compInfo(r.compId, r.comp365); playText(resultSentence({ r, home: resolveTeam(r.homeId, r.home365, lg.name), away: resolveTeam(r.awayId, r.away365, lg.name) })); } break;
+      case 'league-toggle': { const ms = resultsByDate(lgEl.dataset.date, lgEl.dataset.league); const on = ms.every(x => !x.excluded); ms.forEach(x => { x.excluded = on; }); save(); renderResults(); break; }
+      case 'day-toggle': { const ms = resultsByDate(dayEl.dataset.date); const on = ms.every(x => !x.excluded); ms.forEach(x => { x.excluded = on; }); save(); renderResults(); break; }
+      case 'day-copy': { const t = resultsText(dayEl.dataset.date); if (!t) { toast('אין תוצאות מסומנות ביום הזה', true); break; } Platform.copyText(t).then(ok => toast(ok ? 'התוצאות של היום הועתקו ✔' : 'ההעתקה נכשלה', !ok)); break; }
+      case 'day-play': playText(resultsText(dayEl.dataset.date)); break;
+      case 'fix': openFix(b.dataset.team ? Number(b.dataset.team) : null, 'results'); break;
+      case 'copy': { const t = text(); if (!t) { toast('אין תוצאות להעתקה', true); break; } Platform.copyText(t).then(ok => toast(ok ? 'התוצאות הועתקו ✔ — הדבק בבוט' : 'ההעתקה נכשלה, סמן והעתק ידנית', !ok)); break; }
+      case 'share': { const t = text(); if (!t) { toast('אין תוצאות לשליחה', true); break; } Platform.shareText(t).then(ok => { if (!ok) Platform.copyText(t).then(c => toast(c ? 'הטקסט הועתק ✔ — הדבק בבוט' : 'השיתוף לא זמין', !c)); }); break; }
+      case 'play': if (speaking) { Platform.stop(); setSpeaking(false); } else playText(text()); break;
+      case 'mp3': makeMp3(text(), resFileName()); break;
+    }
+  });
+
   let fetchRun = 0;
   $('#btnBusyCancel').addEventListener('click', () => { fetchRun++; busy(false); toast('המשיכה בוטלה'); });
 
@@ -3515,9 +3850,9 @@ window.DEFAULTS.nameMap = {"מכבי תל אביב": "מַכַּבִּי תֵּ�
       if (pickerEl) wordPicker(pickerEl, input, real);
     } catch (e) { toast('הניקוד האוטומטי לא זמין כרגע — הקלד ידנית', true); }
   }
-  function openFix(focusTeamId) {
+  function openFix(focusTeamId, src) {
     render();
-    const { teams, leagues } = lastUnresolved;
+    const { teams, leagues } = (src === 'results') ? resUnresolved : lastUnresolved;
     const list = $('#fixList');
     if (!teams.size && !leagues.size) { toast('כל השמות מנוקדים ✔'); return; }
     const leagueRows = [...leagues.values()].map(l => `
@@ -3563,6 +3898,7 @@ window.DEFAULTS.nameMap = {"מכבי תל אביב": "מַכַּבִּי תֵּ�
   function excludeTeamGames(id) {
     let n = 0;
     state.matches.forEach(m => { if ((m.homeId === id || m.awayId === id) && !m.excluded) { m.excluded = true; n++; } });
+    ((state.results && state.results.games) || []).forEach(r => { if ((r.homeId === id || r.awayId === id) && !r.excluded) { r.excluded = true; n++; } });
     return n;
   }
   $('#fixList').addEventListener('click', async e => {
